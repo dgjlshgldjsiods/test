@@ -42,5 +42,19 @@ export const ru = Object.freeze({
       draft: 'Черновик', updatedAt: 'Изменена', actions: 'Действия'
     },
     status: { DRAFT: 'Черновик', PUBLISHED: 'Опубликована', ARCHIVED: 'В архиве', UNKNOWN: 'Неизвестно' }
+  },
+  formEditor: {
+    code: 'Код', titleRu: 'Название (RU)', titleEn: 'Название (EN)', creator: 'Конструктор формы',
+    create: 'Создать', save: 'Сохранить черновик', saved: 'Черновик сохранён', publish: 'Опубликовать',
+    publishConfirm: 'После публикации эту версию нельзя будет изменить. Продолжить?',
+    historyTitle: 'История версий', backToEditor: 'К редактору', viewVersion: 'Просмотреть',
+    createDraft: 'Создать черновик из версии', openDraft: 'Открыть активный черновик',
+    readOnly: 'Эта версия доступна только для чтения. Для изменения создайте новый черновик.',
+    readOnlyWithDraft: 'Эта версия доступна только для чтения. У формы уже есть активный черновик.',
+    version: 'Версия {number}', versionStatus: 'v{number} · {status}', noVersions: 'Версий пока нет.',
+    activeDraftExists: 'У формы уже есть активный черновик.', versionConflict: 'Версия уже изменена другим пользователем. Перезагрузите страницу.',
+    commandError: 'Не удалось выполнить операцию.', loadError: 'Не удалось загрузить форму.',
+    missingFormId: 'Не указан идентификатор формы.', metadataRequired: 'Заполните код и русское название формы.',
+    creatorUnavailable: 'SurveyJS Creator не загружен. Проверьте доступ к CDN.'
   }
 });
