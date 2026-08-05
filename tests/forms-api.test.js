@@ -27,6 +27,26 @@ QUnit.module('FormsApi', () => {
       { name: 'formsGetVersions', body: { page: 3, pageSize: 10, formId: 'form$1' } }
     ]);
   });
+
+  QUnit.test('команды редактора передают expectedVersion и schema только в тело', async (assert) => {
+    const calls = [];
+    const api = new FormsApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({}); } });
+    const schema = { pages: [{ name: 'main' }] };
+    await api.create({ code: 'FORM-1' }, schema);
+    await api.getVersion('version$1');
+    await api.createVersion('form$1', { sourceVersionId: 'version$1', expectedFormVersion: 3 });
+    await api.cloneVersion('form$1', 'version$1', 3);
+    await api.saveDraft('form$1', 'version$2', schema, 4);
+    await api.publishVersion('form$1', 'version$2', 5);
+    assert.deepEqual(calls, [
+      { name: 'formsCreate', body: { form: { code: 'FORM-1' }, initialSchema: schema } },
+      { name: 'formsGetVersion', body: { formVersionId: 'version$1' } },
+      { name: 'formsCreateVersion', body: { formId: 'form$1', sourceVersionId: 'version$1', schema: null, expectedFormVersion: 3 } },
+      { name: 'formsCloneVersion', body: { formId: 'form$1', sourceVersionId: 'version$1', expectedFormVersion: 3 } },
+      { name: 'formsSaveDraft', body: { formId: 'form$1', formVersionId: 'version$2', schema, expectedVersion: 4 } },
+      { name: 'formsPublishVersion', body: { formId: 'form$1', formVersionId: 'version$2', expectedVersion: 5 } }
+    ]);
+  });
 });
 
 QUnit.module('Forms list components', () => {
