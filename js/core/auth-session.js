@@ -59,6 +59,27 @@ export class AuthSession {
     return this.get()?.language || this.defaultLanguage;
   }
 
+  getCurrentUser() {
+    return this.get()?.user || null;
+  }
+
+  updateCurrentUser(user, expiresAt) {
+    const current = this.get();
+    if (!current) throw new Error('Cannot update an empty session');
+    return this.set({
+      sessionToken: current.sessionToken,
+      expiresAt: expiresAt || current.expiresAt,
+      user,
+      language: user?.language || current.language
+    });
+  }
+
+  replaceToken(sessionToken, expiresAt) {
+    const current = this.get();
+    if (!current) throw new Error('Cannot refresh an empty session');
+    return this.set({ ...current, sessionToken, expiresAt, user: current.user });
+  }
+
   isExpired(now = new Date()) {
     const session = this.get();
     if (!session) return true;
