@@ -1,7 +1,7 @@
 import { initializeProtectedPage } from '../app.js';
 
 await initializeProtectedPage({
-  title: 'Заявки',
+  titleKey: 'pages.requests',
   activeNav: 'requests',
-  content: 'Бизнес-функции этой страницы будут реализованы на отдельном этапе.'
+  contentKey: 'pages.stub'
 });
