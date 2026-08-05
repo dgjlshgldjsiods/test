@@ -45,22 +45,29 @@ export async function initializeProtectedPage(options) {
   if (access.status === 'redirected') return null;
 
   if (access.status === 'forbidden') {
-    return initializePage({
+    return withAccessStatus(initializePage({
       ...options,
       user: access.user,
       onLogout: logout,
       content: createForbiddenState(I18n)
-    });
+    }), 'forbidden');
   }
 
   if (access.status === 'error') {
-    return initializePage({
+    return withAccessStatus(initializePage({
       ...options,
       user: access.user,
       onLogout: logout,
       content: createErrorState(I18n, 'states.sessionError')
-    });
+    }), 'error');
   }
 
-  return initializePage({ ...options, user: access.user, onLogout: logout });
+  return withAccessStatus(
+    initializePage({ ...options, user: access.user, onLogout: logout }),
+    'ready'
+  );
+}
+
+function withAccessStatus(page, accessStatus) {
+  return Object.freeze({ ...page, accessStatus });
 }
