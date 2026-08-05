@@ -15,21 +15,21 @@ function createState(kind, title, message, action) {
   return wrapper;
 }
 
-export function createLoadingState(message = 'Загрузка…') {
-  const state = createState('loading', 'Загрузка', message);
+export function createLoadingState(i18n, messageKey = 'states.loading') {
+  const state = createState('loading', i18n.t('states.loadingTitle'), i18n.t(messageKey));
   const spinner = createElement('div', {
     className: 'spinner-border text-primary mb-3',
-    attributes: { role: 'status', 'aria-label': 'Загрузка' }
+    attributes: { role: 'status', 'aria-label': i18n.t('states.loadingTitle') }
   });
   state.firstElementChild.prepend(spinner);
   return state;
 }
-export function createEmptyState(message = 'Здесь пока ничего нет.') {
-  return createState('empty', 'Нет данных', message);
+export function createEmptyState(i18n, messageKey = 'states.empty') {
+  return createState('empty', i18n.t('states.emptyTitle'), i18n.t(messageKey));
 }
-export function createErrorState(message = 'Не удалось загрузить данные.') {
-  return createState('error', 'Произошла ошибка', message);
+export function createErrorState(i18n, messageKey = 'states.error') {
+  return createState('error', i18n.t('states.errorTitle'), i18n.t(messageKey));
 }
-export function createForbiddenState(message = 'У вас нет доступа к этому разделу.') {
-  return createState('forbidden', 'Доступ запрещён', message);
+export function createForbiddenState(i18n, messageKey = 'states.forbidden') {
+  return createState('forbidden', i18n.t('states.forbiddenTitle'), i18n.t(messageKey));
 }
