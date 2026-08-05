@@ -1,1 +1,7 @@
-/* Стили страницы forms будут добавлены в соответствующем вертикальном этапе. */
+.forms-page .table th { white-space: nowrap; }
+.forms-page .table td { vertical-align: middle; }
+.forms-page .btn-group { white-space: nowrap; }
+@media (max-width: 767.98px) {
+  .forms-pagination { align-items: stretch !important; }
+  .forms-pagination .pagination { justify-content: center; }
+}
