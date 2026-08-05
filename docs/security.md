@@ -24,6 +24,8 @@
 
 Groovy-файлы используют названия authenticationAdapter, sessionRepository и permissionAdapter только как проектные порты. До реализации TODO(NAUMEN-AUTH), TODO(NAUMEN-SESSION) и TODO(NAUMEN-PERMISSIONS) они не являются готовой интеграцией с Naumen.
 
+Язык и тема хранятся отдельными нечувствительными значениями itsm.language и itsm.theme. Ранняя тема применяется внешним same-origin скриптом theme-bootstrap.js до подключения CSS, поэтому не требует inline-кода и не раскрывает данные сессии. Эти предпочтения не являются доверенными данными авторизации.
+
 ## 3. XSS и DOM
 
 - Обычный текст выводится через textContent/createTextNode.
