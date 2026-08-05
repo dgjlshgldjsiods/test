@@ -1,7 +1,7 @@
 import { initializeProtectedPage } from '../app.js';
 
 await initializeProtectedPage({
-  title: 'Профиль',
+  titleKey: 'pages.profile',
   activeNav: 'profile',
-  content: 'Бизнес-функции этой страницы будут реализованы на отдельном этапе.'
+  contentKey: 'pages.stub'
 });
