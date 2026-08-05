@@ -42,5 +42,19 @@ export const en = Object.freeze({
       draft: 'Draft', updatedAt: 'Updated', actions: 'Actions'
     },
     status: { DRAFT: 'Draft', PUBLISHED: 'Published', ARCHIVED: 'Archived', UNKNOWN: 'Unknown' }
+  },
+  formEditor: {
+    code: 'Code', titleRu: 'Title (RU)', titleEn: 'Title (EN)', creator: 'Form designer',
+    create: 'Create', save: 'Save draft', saved: 'Draft saved', publish: 'Publish',
+    publishConfirm: 'Once published, this version cannot be edited. Continue?',
+    historyTitle: 'Version history', backToEditor: 'Back to editor', viewVersion: 'View',
+    createDraft: 'Create draft from version', openDraft: 'Open active draft',
+    readOnly: 'This version is read-only. Create a new draft to make changes.',
+    readOnlyWithDraft: 'This version is read-only. The form already has an active draft.',
+    version: 'Version {number}', versionStatus: 'v{number} · {status}', noVersions: 'No versions yet.',
+    activeDraftExists: 'This form already has an active draft.', versionConflict: 'Another user has changed this version. Reload the page.',
+    commandError: 'The operation failed.', loadError: 'Could not load the form.',
+    missingFormId: 'Form identifier is missing.', metadataRequired: 'Enter the code and Russian form title.',
+    creatorUnavailable: 'SurveyJS Creator failed to load. Check CDN access.'
   }
 });
