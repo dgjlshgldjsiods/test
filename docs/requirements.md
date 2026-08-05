@@ -3428,15 +3428,56 @@ prompt
 
 Конкретный файловый API Naumen необходимо уточнить отдельно.
 
-До уточнения реализовать абстрактный интерфейс:
+но есть такой пример на groovy
+Прикрепление файла из одного приложения SMP к другому приложению SMP
+'''
+import java.nio.charset.Charset
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.utils.URIBuilder
+import org.apache.http.entity.mime.content.ByteArrayBody
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.entity.mime.MultipartEntity
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.mime.HttpMultipartMode
+import groovy.transform.Field
 
-```javascript
-filesApi.upload({
-    entityType: "REQUEST",
-    entityId: requestId,
-    file
-});
-```
+@Field String ACCESS_KEY = '<accessKey.UUID>'
+@Field String HOST = 'naumen.ru'
+@Field String SCHEME = 'https'
+
+def addFile(def objectUUIDToAddFile, def file)
+{
+    def path = "/sd/services/rest/add-file/${objectUUIDToAddFile}";
+    def uri = new URIBuilder()
+        .setScheme(SCHEME)
+        .setHost(HOST)
+        .setPath(path)
+        .setParameter('accessKey', ACCESS_KEY)
+        .build()
+    def content = utils.readFileContent(file);
+    def utf8 = Charset.forName("UTF-8");
+    def contentType = ContentType.create(ContentType.DEFAULT_BINARY.getMimeType(), utf8);
+    def body = new ByteArrayBody(content, contentType, file.title);
+
+    def entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, null, utf8);
+    entity.addPart(file.title, body);
+
+    def post = new HttpPost(uri);
+    post.setEntity(entity)
+
+    def httpClient = HttpClients.createDefault();
+    def httpResponse = httpClient.execute(post);
+    httpResponse.withCloseable {response ->
+        def line = response.getStatusLine()
+    }
+}
+
+def file = utils.get('file$123')
+def objectUUIDToAddFile = utils.get('serviceCall$123')?.UUID
+return addFile(objectUUIDToAddFile, file)
+'''
+
+
 
 Не выдумывать конкретный файловый API Naumen как реально существующий.
 
