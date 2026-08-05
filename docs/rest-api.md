@@ -140,7 +140,7 @@ TODO(NAUMEN-STORAGE), TODO(NAUMEN-DIRECTORY).
 
 formsCreateVersion/Clone назначают versionNumber на сервере. Save разрешен только активному DRAFT. Publish валидирует безопасную schema и выполняется атомарно. VERSION_CONFLICT возвращается и при конкурирующем создании второго DRAFT.
 
-На этапе 6 реализованы только read-only функции formsGetList, formsGet и formsGetVersions. Их Groovy-код использует проектный formRepository; конкретное хранение Naumen остаётся TODO(NAUMEN-FORMS).
+На этапе 7 реализованы браузерные контракты и Groovy entry-функции всех перечисленных операций редактора. `formRepository` и `formSchemaValidator` — проектные порты; конкретное хранение, блокировки и SurveyJS allowlist в Naumen остаются TODO(NAUMEN-FORMS), TODO(NAUMEN-TXN) и TODO(SURVEY-EXPRESSIONS).
 
 Запрос formsGetList:
 
@@ -158,7 +158,34 @@ formsCreateVersion/Clone назначают versionNumber на сервере. S
 
 formsGet принимает formId. formsGetVersions принимает formId, page и pageSize и возвращает PageResult<FormVersion>. Все три функции требуют FORM_ADMIN или SYSTEM_ADMIN.
 
-TODO(SURVEY-EXPRESSIONS), TODO(NAUMEN-TXN).
+Команды этапа 7:
+
+    formsCreate {
+      "form": {"code":"INCIDENT","title":{"ru":"Инцидент","en":"Incident"},"description":{"ru":"","en":""}},
+      "initialSchema": {"pages":[]}
+    }
+
+    formsCreateVersion {
+      "formId":"form$1","sourceVersionId":"formVersion$1","schema":null,"expectedFormVersion":3
+    }
+
+    formsCloneVersion {
+      "formId":"form$1","sourceVersionId":"formVersion$1","expectedFormVersion":3
+    }
+
+    formsSaveDraft {
+      "formId":"form$1","formVersionId":"formVersion$2","schema":{"pages":[]},"expectedVersion":4
+    }
+
+    formsPublishVersion {
+      "formId":"form$1","formVersionId":"formVersion$2","expectedVersion":5
+    }
+
+`expectedFormVersion` относится к optimistic-lock полю `Form.version`; `expectedVersion` — к `FormVersion.entityVersion`. Клиент никогда не передаёт желаемый `versionNumber`: его назначает `formRepository` в атомарной операции. `formsCreate` возвращает `{form,draftVersion}`, `formsCreateVersion`/`formsCloneVersion`/`formsSaveDraft` — `draftVersion`, публикация — `{form,publishedVersion}`.
+
+Адаптер мутаций возвращает проектный результат `{data:...}` либо `{errorCode,safeMessage,fieldErrors,details}`. Конкурентное создание второго черновика, несовпадение optimistic lock, попытка сохранить неактивный DRAFT или публикация уже изменённой версии возвращают `VERSION_CONFLICT`. PUBLISHED и ARCHIVED не имеют операций update/delete.
+
+Перед сохранением и повторно внутри транзакции публикации `formSchemaValidator` проверяет JSON по утверждённому allowlist. До реализации адаптера команды изменения завершаются безопасной ошибкой, а не сохраняют непроверенную схему.
 
 ### Заявки
 
