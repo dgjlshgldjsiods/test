@@ -5,6 +5,7 @@ export class AuthSession {
     this.storage = options.storage || globalThis.localStorage;
     this.storageKey = options.storageKey || DEFAULT_STORAGE_KEY;
     this.defaultLanguage = options.defaultLanguage || 'ru';
+    this.languageStorageKey = options.languageStorageKey || 'itsm.language';
   }
 
   set(session) {
@@ -56,7 +57,18 @@ export class AuthSession {
   }
 
   getLanguage() {
-    return this.get()?.language || this.defaultLanguage;
+    try {
+      return this.storage.getItem(this.languageStorageKey)
+        || this.get()?.language
+        || this.defaultLanguage;
+    } catch {
+      return this.get()?.language || this.defaultLanguage;
+    }
+  }
+
+  setLanguage(language) {
+    this.storage.setItem(this.languageStorageKey, language);
+    return language;
   }
 
   getCurrentUser() {
