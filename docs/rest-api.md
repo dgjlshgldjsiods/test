@@ -15,6 +15,10 @@ Query string содержит только accessKey, func, params. Заголо
 
 NaumenApiClient автоматически добавляет requestId, language и для защищенных вызовов sessionToken. authLogin использует auth:false. HTTP 200 не означает бизнес-успех.
 
+Реализация этапа 3 находится в js/api/naumen-api-client.js. Транспорт не выполняет навигацию и не знает предметных API. При HTTP 401, INVALID_SESSION и SESSION_EXPIRED он очищает AuthSession и может вызвать переданный callback onSessionInvalid; перенаправление относится к этапу авторизации.
+
+Типизированная ошибка NaumenApiError содержит kind, code, status, requestId, fieldErrors и details. Транспортные коды клиента: EMPTY_RESPONSE, INVALID_JSON_RESPONSE, HTTP_ERROR, BUSINESS_ERROR, TIMEOUT и REQUEST_ABORTED.
+
 ## 2. Конверты
 
 Успех:
