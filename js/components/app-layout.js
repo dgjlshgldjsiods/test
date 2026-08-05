@@ -11,7 +11,7 @@ export class AppLayout {
   render() {
     const skip = createElement('a', {
       className: 'skip-link btn btn-primary',
-      text: 'К содержимому',
+      text: this.options.i18n.t('common.skipToContent'),
       attributes: { href: '#main-content' }
     });
     const shell = createElement('div', { className: 'app-shell' });
@@ -24,15 +24,20 @@ export class AppLayout {
     const heading = createElement('header', { className: 'app-page-heading' });
     heading.append(
       createElement('h1', { className: 'h2', text: this.options.title }),
-      createElement('p', { className: 'text-body-secondary mb-0', text: 'Этап 2: базовая структура интерфейса' })
+      createElement('p', { className: 'text-body-secondary mb-0', text: this.options.i18n.t('common.stageCaption') })
     );
     const pageContent = this.options.content instanceof Node
       ? this.options.content
       : createTextCard(this.options.content);
     content.append(heading, pageContent);
     main.append(content);
-    body.append(createSidebar(this.options.activeNav, this.options.user), main);
-    shell.append(createNavbar(this.options.user, this.options.onLogout), body);
+    body.append(createSidebar(this.options.activeNav, this.options.user, this.options.i18n), main);
+    shell.append(createNavbar({
+      user: this.options.user,
+      onLogout: this.options.onLogout,
+      i18n: this.options.i18n,
+      theme: this.options.theme
+    }), body);
     this.root.replaceChildren(skip, shell);
   }
 }
