@@ -56,4 +56,10 @@ QUnit.module('AuthSession', () => {
     assert.strictEqual(session.getSessionToken(), 'token');
     assert.strictEqual(session.getCurrentUser().id, 'new');
   });
+
+  QUnit.test('сохранённый язык имеет приоритет и доступен транспорту', (assert) => {
+    const session = new AuthSession({ storage: createMemoryStorage(), defaultLanguage: 'ru' });
+    session.setLanguage('en');
+    assert.strictEqual(session.getLanguage(), 'en');
+  });
 });
