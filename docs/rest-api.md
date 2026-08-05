@@ -140,6 +140,24 @@ TODO(NAUMEN-STORAGE), TODO(NAUMEN-DIRECTORY).
 
 formsCreateVersion/Clone назначают versionNumber на сервере. Save разрешен только активному DRAFT. Publish валидирует безопасную schema и выполняется атомарно. VERSION_CONFLICT возвращается и при конкурирующем создании второго DRAFT.
 
+На этапе 6 реализованы только read-only функции formsGetList, formsGet и formsGetVersions. Их Groovy-код использует проектный formRepository; конкретное хранение Naumen остаётся TODO(NAUMEN-FORMS).
+
+Запрос formsGetList:
+
+    {
+      "page": 1,
+      "pageSize": 20,
+      "filters": {
+        "search": "incident",
+        "statuses": ["DRAFT", "PUBLISHED", "ARCHIVED"]
+      },
+      "sort": [{"field": "updatedAt", "direction": "desc"}]
+    }
+
+Разрешённые поля сортировки этапа: code, title, status, updatedAt. Поиск title/code, фильтрация, сортировка и пагинация выполняются серверным адаптером. Максимальный pageSize — 100. Form summary должен содержать id, code, title, status, currentPublishedVersion, activeDraftVersion и updatedAt. Ответ — общий PageResult<Form>.
+
+formsGet принимает formId. formsGetVersions принимает formId, page и pageSize и возвращает PageResult<FormVersion>. Все три функции требуют FORM_ADMIN или SYSTEM_ADMIN.
+
 TODO(SURVEY-EXPRESSIONS), TODO(NAUMEN-TXN).
 
 ### Заявки
