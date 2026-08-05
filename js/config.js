@@ -6,5 +6,7 @@ window.ITSM_CONFIG = Object.freeze({
   debug: false,
   defaultLanguage: 'ru',
   defaultTheme: 'light',
-  sessionStorageKey: 'itsm.session'
+  sessionStorageKey: 'itsm.session',
+  languageStorageKey: 'itsm.language',
+  themeStorageKey: 'itsm.theme'
 });
