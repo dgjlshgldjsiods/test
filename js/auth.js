@@ -7,6 +7,7 @@ const config = globalThis.ITSM_CONFIG || {};
 
 export const authSession = new AuthSession({
   storageKey: config.sessionStorageKey,
+  languageStorageKey: config.languageStorageKey,
   defaultLanguage: config.defaultLanguage
 });
 
