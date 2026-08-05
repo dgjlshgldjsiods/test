@@ -1,0 +1,19 @@
+:root {
+  --app-sidebar-width: 17rem;
+}
+html, body { min-height: 100%; }
+body { background: var(--bs-tertiary-bg); }
+.app-shell { min-height: 100vh; }
+.app-main { min-width: 0; padding: 1.5rem; }
+.app-content { max-width: 90rem; margin-inline: auto; }
+.app-page-heading { margin-bottom: 1.5rem; }
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -4rem;
+  z-index: 1100;
+}
+.skip-link:focus { top: 1rem; }
+@media (min-width: 992px) {
+  .app-body { display: grid; grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr); }
+}
