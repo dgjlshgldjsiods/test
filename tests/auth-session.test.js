@@ -40,4 +40,20 @@ QUnit.module('AuthSession', () => {
     session.clear();
     assert.strictEqual(session.getSessionToken(), null);
   });
+
+  QUnit.test('не возвращает истёкший token и очищает его', (assert) => {
+    const storage = createMemoryStorage();
+    const session = new AuthSession({ storage });
+    session.set({ sessionToken: 'expired', expiresAt: '2000-01-01T00:00:00Z' });
+    assert.strictEqual(session.getSessionToken(), null);
+    assert.strictEqual(session.get(), null);
+  });
+
+  QUnit.test('обновляет пользователя без смены token', (assert) => {
+    const session = new AuthSession({ storage: createMemoryStorage() });
+    session.set({ sessionToken: 'token', expiresAt: '2030-01-01T00:00:00Z', user: { id: 'old' } });
+    session.updateCurrentUser({ id: 'new', roles: ['USER'] });
+    assert.strictEqual(session.getSessionToken(), 'token');
+    assert.strictEqual(session.getCurrentUser().id, 'new');
+  });
 });
