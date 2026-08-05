@@ -1,6 +1,9 @@
 .forms-page .table th { white-space: nowrap; }
 .forms-page .table td { vertical-align: middle; }
 .forms-page .btn-group { white-space: nowrap; }
+.survey-creator-host { min-height: 68vh; overflow: hidden; }
+.form-editor-toolbar .form-label { font-size: .8rem; margin-bottom: .25rem; }
+.form-editor-page .svc-creator { min-height: 68vh; }
 @media (max-width: 767.98px) {
   .forms-pagination { align-items: stretch !important; }
   .forms-pagination .pagination { justify-content: center; }
