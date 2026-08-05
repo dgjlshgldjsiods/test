@@ -5,5 +5,6 @@ window.ITSM_CONFIG = Object.freeze({
   requestTimeout: 30000,
   debug: false,
   defaultLanguage: 'ru',
-  defaultTheme: 'light'
+  defaultTheme: 'light',
+  sessionStorageKey: 'itsm.session'
 });
