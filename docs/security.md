@@ -20,6 +20,10 @@
 - Refresh policy и rotation: TODO(NAUMEN-SESSION).
 - Защищенные страницы проверяют expiresAt до рендера; сервер проверяет каждую операцию.
 
+Реализация этапа 4 хранит в localStorage только sessionToken, expiresAt, язык и минимальный allowlist полей пользователя. Истёкший token очищается до сетевого вызова. Каждая защищённая страница до бизнес-рендера вызывает authGetCurrentUser; HTTP 401, INVALID_SESSION и SESSION_EXPIRED очищают сессию и запускают переход на login.html. Пользовательский token передаётся NaumenApiClient только в JSON-теле; Authorization: Bearer не используется.
+
+Groovy-файлы используют названия authenticationAdapter, sessionRepository и permissionAdapter только как проектные порты. До реализации TODO(NAUMEN-AUTH), TODO(NAUMEN-SESSION) и TODO(NAUMEN-PERMISSIONS) они не являются готовой интеграцией с Naumen.
+
 ## 3. XSS и DOM
 
 - Обычный текст выводится через textContent/createTextNode.
