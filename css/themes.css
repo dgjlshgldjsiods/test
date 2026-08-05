@@ -1,2 +1,9 @@
-html[data-bs-theme="light"] { color-scheme: light; }
-html[data-bs-theme="dark"] { color-scheme: dark; }
+html[data-bs-theme="light"] {
+  color-scheme: light;
+  --app-sidebar-surface: #fff;
+}
+html[data-bs-theme="dark"] {
+  color-scheme: dark;
+  --app-sidebar-surface: #212529;
+}
+.app-sidebar { background: var(--app-sidebar-surface, var(--bs-body-bg)); }
