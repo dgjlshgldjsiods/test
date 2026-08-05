@@ -26,14 +26,21 @@ export class AppLayout {
       createElement('h1', { className: 'h2', text: this.options.title }),
       createElement('p', { className: 'text-body-secondary mb-0', text: 'Этап 2: базовая структура интерфейса' })
     );
-    const card = createElement('section', { className: 'card border-0 shadow-sm' });
-    const cardBody = createElement('div', { className: 'card-body' });
-    cardBody.append(createElement('p', { className: 'mb-0', text: this.options.content }));
-    card.append(cardBody);
-    content.append(heading, card);
+    const pageContent = this.options.content instanceof Node
+      ? this.options.content
+      : createTextCard(this.options.content);
+    content.append(heading, pageContent);
     main.append(content);
-    body.append(createSidebar(this.options.activeNav), main);
-    shell.append(createNavbar(), body);
+    body.append(createSidebar(this.options.activeNav, this.options.user), main);
+    shell.append(createNavbar(this.options.user, this.options.onLogout), body);
     this.root.replaceChildren(skip, shell);
   }
+}
+
+function createTextCard(text) {
+  const card = createElement('section', { className: 'card border-0 shadow-sm' });
+  const cardBody = createElement('div', { className: 'card-body' });
+  cardBody.append(createElement('p', { className: 'mb-0', text }));
+  card.append(cardBody);
+  return card;
 }
