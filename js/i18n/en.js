@@ -2,6 +2,7 @@ export const en = Object.freeze({
   common: {
     appName: 'ITSM', prototype: 'Prototype', user: 'User',
     logout: 'Sign out', cancel: 'Cancel', continue: 'Continue', close: 'Close',
+    search: 'Search', retry: 'Retry', edit: 'Edit', yes: 'Yes', no: 'No',
     skipToContent: 'Skip to content', language: 'Language', theme: 'Theme',
     lightTheme: 'Light', darkTheme: 'Dark', stageCaption: 'Basic interface structure'
   },
@@ -27,5 +28,19 @@ export const en = Object.freeze({
     login: 'Sign in', serviceCatalog: 'Service catalog', serviceForm: 'Create request',
     requests: 'Requests', requestCard: 'Request details', profile: 'Profile',
     catalogEditor: 'Catalog editor', forms: 'Forms', formEditor: 'Form editor', slaEditor: 'SLA settings'
+  },
+  pagination: {
+    label: 'Page navigation', previous: 'Previous', next: 'Next', total: 'Total: {total}'
+  },
+  forms: {
+    search: 'Search forms', searchPlaceholder: 'Title or code', statusFilter: 'Form status',
+    allStatuses: 'All statuses', create: 'Create form', history: 'Version history',
+    empty: 'No forms match the selected filters.', loadError: 'Could not load the forms list.',
+    notPublished: 'Not published',
+    columns: {
+      code: 'Code', title: 'Title', status: 'Status', publishedVersion: 'Published version',
+      draft: 'Draft', updatedAt: 'Updated', actions: 'Actions'
+    },
+    status: { DRAFT: 'Draft', PUBLISHED: 'Published', ARCHIVED: 'Archived', UNKNOWN: 'Unknown' }
   }
 });
