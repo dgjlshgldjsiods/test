@@ -27,11 +27,11 @@
     /admin/form-editor.html
     /admin/sla-editor.html
 
-## Зависимости этапа 2
+## Браузерные зависимости
 
-Bootstrap 5.3.3 временно подключен с jsDelivr CDN с integrity и crossorigin. Поэтому для полного оформления и работы modal/toast браузеру требуется доступ к CDN.
+Bootstrap 5.3.3 подключен с jsDelivr CDN. Страница `admin/form-editor.html` дополнительно подключает официальные браузерные пакеты `survey-core`, `survey-js-ui`, `survey-creator-core` и `survey-creator-js` с unpkg по схеме из документации SurveyJS. Для редактора требуется коммерческая лицензия SurveyJS Creator и доступ к CDN.
 
-TODO(DEPENDENCIES): на следующем подходящем этапе разместить проверенные фиксированные файлы Bootstrap, SurveyJS и QUnit локально в vendor и изменить ссылки на same-origin. До этого offline-запуск покажет содержимое, но без Bootstrap-оформления.
+TODO(DEPENDENCIES): разместить лицензированные, проверенные и фиксированные версии SurveyJS локально в `vendor`, добавить SRI/самостоятельное размещение и изменить ссылки на same-origin. Сейчас SurveyJS URL следуют официальному примеру без фиксации версии, поэтому воспроизводимость и offline-запуск редактора ограничены.
 
 ## Конфигурация
 
