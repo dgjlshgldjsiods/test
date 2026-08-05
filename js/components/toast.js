@@ -1,7 +1,8 @@
 import { createElement } from './dom.js';
 
 export class ToastService {
-  constructor() {
+  constructor(i18n) {
+    this.i18n = i18n;
     this.region = createElement('div', {
       className: 'app-toast-region toast-container',
       attributes: { 'aria-live': 'polite', 'aria-atomic': 'true' }
@@ -21,7 +22,7 @@ export class ToastService {
     const body = createElement('div', { className: 'toast-body', text: message });
     const close = createElement('button', {
       className: 'btn-close btn-close-white me-2 m-auto',
-      attributes: { type: 'button', 'data-bs-dismiss': 'toast', 'aria-label': 'Закрыть' }
+      attributes: { type: 'button', 'data-bs-dismiss': 'toast', 'aria-label': this.i18n.t('common.close') }
     });
     row.append(body, close);
     toast.append(row);
