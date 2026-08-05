@@ -35,7 +35,7 @@ TODO(DEPENDENCIES): на следующем подходящем этапе ра
 
 ## Конфигурация
 
-js/config.js содержит только placeholder baseUrl и accessKey. На этапе 2 сетевые вызовы отсутствуют. Реальные секреты нельзя коммитить.
+js/config.js содержит только placeholder baseUrl и accessKey. Реальные секреты нельзя коммитить. defaultLanguage/defaultTheme задают первоначальные значения; пользовательский выбор сохраняется в localStorage под ключами itsm.language и itsm.theme.
 
 ## Диагностика
 
