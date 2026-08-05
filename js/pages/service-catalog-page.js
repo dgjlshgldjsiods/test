@@ -1,6 +1,6 @@
-import { initializePage } from '../app.js';
+import { initializeProtectedPage } from '../app.js';
 
-initializePage({
+await initializeProtectedPage({
   title: 'Каталог услуг',
   activeNav: 'catalog',
   content: 'Бизнес-функции этой страницы будут реализованы на отдельном этапе.'
