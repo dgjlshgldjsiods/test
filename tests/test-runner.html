@@ -16,10 +16,12 @@
     await import('./naumen-api-client.test.js');
     await import('./permissions.test.js');
     await import('./i18n.test.js');
-    await import('./forms-api.test.js');
+    await import('./forms-api.test.js?stage=10b');
     await import('./form-versioning.test.js');
     await import('./availability-matcher.test.js');
-    await import('./catalog-api.test.js');
+    await import('./catalog-api.test.js?stage=10');
+    await import('./safe-survey-schema.test.js');
+    await import('./requests-api.test.js');
     QUnit.start();
   </script>
 </body>
