@@ -110,5 +110,29 @@ export const en = Object.freeze({
       RESOLVED: 'Resolved', CLOSED: 'Closed', CANCELLED: 'Cancelled', UNKNOWN: 'Unknown'
     },
     sla: { paused: 'Paused', breached: 'Breached', onTime: 'On time' }
+  },
+  requestCard: {
+    missingId: 'Request identifier is missing.', loadError: 'Could not load request details.',
+    service: 'Service', author: 'Author', requestedFor: 'Requested for', createdAt: 'Created',
+    group: 'Work group', assignee: 'Assignee', submittedForm: 'Submitted form',
+    changeStatus: 'Change status', statusComment: 'Status change comment',
+    assignment: 'Assignment', notAssigned: 'Not assigned', assignmentError: 'Could not change assignment.',
+    assignmentLoadError: 'Could not load assignment directories.', commandError: 'The operation failed.',
+    versionConflict: 'Another user has changed the request. Reload the details.',
+    comments: 'Comments', commentText: 'Comment text', commentType: 'Comment type',
+    publicComment: 'Public', internalComment: 'Internal', addComment: 'Add comment',
+    noComments: 'There are no comments yet.', commentError: 'Could not add the comment.', commentsLoadError: 'Could not load comments.',
+    commentTypes: { PUBLIC: 'Public', INTERNAL: 'Internal' },
+    history: 'History', noHistory: 'History is empty.', historyLoadError: 'Could not load history.',
+    events: {
+      CREATED: 'Request created', STATUS_CHANGED: 'Status changed', ASSIGNMENT_CHANGED: 'Assignment changed',
+      FIELDS_CHANGED: 'Fields changed', COMMENT_ADDED: 'Comment added', ATTACHMENT_ADDED: 'Attachment added',
+      SLA_CALCULATED: 'SLA calculated', SLA_PAUSED: 'SLA paused', SLA_RESUMED: 'SLA resumed',
+      SLA_RULE_CONFLICT: 'SLA rule conflict', UNKNOWN: 'Request changed'
+    },
+    sla: 'SLA', reactionDeadline: 'Reaction deadline', resolutionDeadline: 'Resolution deadline',
+    remainingReaction: 'Reaction time left', remainingResolution: 'Resolution time left', minutes: '{count} min',
+    attachments: 'Attachments', noAttachments: 'No attachments.',
+    attachmentReadOnly: 'Adding attachments will be implemented after the Naumen file adapter is confirmed.'
   }
 });
