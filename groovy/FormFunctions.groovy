@@ -1,7 +1,7 @@
 /**
  * Entry-функции форм и версий для modules.newItsmTest.forms*.
  *
- * formRepository, sessionRepository и permissionAdapter — проектные порты,
+ * formRepository, sessionRepository, permissionAdapter, catalogRepository и directoryAdapter — проектные порты,
  * а не встроенные API Naumen.
  * formRepository обязан атомарно проверять expectedVersion, назначать
  * versionNumber и гарантировать единственный активный DRAFT.
@@ -20,6 +20,8 @@ class FormFunctions {
     def sessionRepository
     def permissionAdapter
     def formSchemaValidator
+    def catalogRepository
+    def directoryAdapter
     def logger
 
     Map formsGetList(Map requestContent, def user) {
@@ -88,10 +90,31 @@ class FormFunctions {
     }
 
     Map formsGetVersion(Map requestContent, def user) {
-        return readOperation('formsGetVersion', requestContent) { access, requestId ->
+        String requestId = CommonFunctions.requestId(requestContent)
+        try {
+            Map access = requireAuthenticated(requestContent, requestId)
+            if (access.errorResponse) return access.errorResponse
             String versionId = requiredId(requestContent?.formVersionId, 'formVersionId')
-            Map version = formRepository.findVersionById(versionId, access.currentUser)
+            Map version
+            if (access.currentUser.roles.any { ['FORM_ADMIN', 'SYSTEM_ADMIN'].contains(it) }) {
+                version = formRepository.findVersionById(versionId, access.currentUser)
+            } else {
+                String serviceId = requiredId(requestContent?.serviceId, 'serviceId')
+                Map userContext = directoryAdapter.getCatalogAccessContext(access.currentUser.id)
+                if (!(userContext instanceof Map)) throw new IllegalStateException('DirectoryAdapter returned invalid context')
+                userContext.id = access.currentUser.id
+                // Project adapter returns a version only when the service is
+                // available, PUBLISHED and references this PUBLISHED version.
+                version = catalogRepository.findPublishedFormVersionForService(
+                    serviceId, versionId, userContext, formRepository
+                )
+            }
             return version ? CommonFunctions.successResponse(version, requestId) : versionNotFound(requestId)
+        } catch (IllegalArgumentException exception) {
+            return CommonFunctions.errorResponse('VALIDATION_ERROR', exception.message, [:], [], requestId)
+        } catch (Exception exception) {
+            safeLog('formsGetVersion', requestId, exception)
+            return internalError(requestId)
         }
     }
 
@@ -267,6 +290,18 @@ class FormFunctions {
         }
         currentUser.roles = roles
         return [currentUser: currentUser]
+    }
+
+    private Map requireAuthenticated(Map requestContent, String requestId) {
+        String token = requestContent?.sessionToken?.toString()
+        Map session = token ? sessionRepository.findActiveByToken(token) : null
+        if (!session) return [errorResponse: CommonFunctions.errorResponse('INVALID_SESSION', 'Пользовательская сессия недействительна', [:], [], requestId)]
+        if (session.expiresAt && session.expiresAt <= new Date()) {
+            sessionRepository.revoke(session.id)
+            return [errorResponse: CommonFunctions.errorResponse('SESSION_EXPIRED', 'Срок пользовательской сессии истёк', [:], [], requestId)]
+        }
+        List roles = permissionAdapter.rolesForUser(session.userId) ?: []
+        return [currentUser: [id: session.userId, roles: roles]]
     }
 
     private static Map normalizeFilters(def value) {
