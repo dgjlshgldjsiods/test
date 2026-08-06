@@ -1,6 +1,6 @@
 # REST API прототипа ITSM
 
-Статус: проектный контракт. Имена функций modules.newItsmTest.* — функции, которые предстоит реализовать в проекте; они не являются встроенными API Naumen. Внутренние вызовы Naumen скрыты за адаптерами и отмечаются TODO.
+Статус: финальный проектный контракт. Для большинства перечисленных функций подготовлены frontend API и Groovy entry-функции, однако их адаптеры не подключены к реальной установке. Имена modules.newItsmTest.* не являются встроенными API Naumen. Внутренние вызовы скрыты за адаптерами и отмечаются TODO.
 
 ## 1. Транспорт
 
@@ -15,7 +15,7 @@ Query string содержит только accessKey, func, params. Заголо
 
 NaumenApiClient автоматически добавляет requestId, language и для защищенных вызовов sessionToken. authLogin использует auth:false. HTTP 200 не означает бизнес-успех.
 
-Реализация этапа 3 находится в js/api/naumen-api-client.js. Транспорт не выполняет навигацию и не знает предметных API. При HTTP 401, INVALID_SESSION и SESSION_EXPIRED он очищает AuthSession и может вызвать переданный callback onSessionInvalid; перенаправление относится к этапу авторизации.
+Реализация находится в js/api/naumen-api-client.js. Транспорт не знает предметных API. При HTTP 401, INVALID_SESSION и SESSION_EXPIRED он очищает AuthSession и вызывает настроенный callback onSessionInvalid; `auth.js` выполняет переход на login.html.
 
 Типизированная ошибка NaumenApiError содержит kind, code, status, requestId, fieldErrors и details. Транспортные коды клиента: EMPTY_RESPONSE, INVALID_JSON_RESPONSE, HTTP_ERROR, BUSINESS_ERROR, TIMEOUT и REQUEST_ABORTED.
 
@@ -166,7 +166,7 @@ TODO(NAUMEN-STORAGE), TODO(NAUMEN-DIRECTORY).
 | formsGetList | page/pageSize/filters/sort | PageResult<Form> |
 | formsGet | formId | form |
 | formsCreate | form, initialSchema | form, draftVersion |
-| formsUpdate | formId, changes, expectedVersion | form |
+| formsUpdate *(зарезервировано)* | formId, changes, expectedVersion | form |
 | formsGetVersions | formId, page/pageSize | PageResult<FormVersion> |
 | formsGetVersion | formVersionId | formVersion |
 | formsCreateVersion | formId, sourceVersionId?, schema?, expectedFormVersion | draftVersion |
@@ -238,9 +238,9 @@ formsGet принимает formId. formsGetVersions принимает formId, 
 | requestsGetComments | entityId, page/pageSize | PageResult<Comment> |
 | requestsGetHistory | entityId, page/pageSize | PageResult<HistoryEvent> |
 | requestsGetAttachments | entityId | attachments[] |
-| requestsAddAttachment | entityId, file/temporaryFileId, expectedVersion? | attachment |
+| requestsAddAttachment *(зарезервировано)* | entityId, file/temporaryFileId, expectedVersion? | attachment |
 | requestsGetSla | entityId | requestSla |
-| requestsRecalculateSla | entityId, reason, expectedVersion | requestSla |
+| requestsRecalculateSla *(зарезервировано)* | entityId, reason, expectedVersion | requestSla |
 
 requestsCreate использует requestId как idempotency key. Сервер заново проверяет услугу, доступность, конкретную опубликованную версию, allowlist полей, обязательность, типы, requestedFor и вложения. fieldValues не превращаются в произвольные имена атрибутов без schema mapping в RequestRepository.
 
@@ -363,7 +363,7 @@ TODO(NAUMEN-CALENDAR), TODO(SLA-DEFAULT), TODO(NAUMEN-TXN).
 
 | Функция | Запрос | data |
 |---|---|---|
-| usersGetList | page/pageSize/filters/sort | PageResult<User> |
+| usersGetList *(зарезервировано)* | page/pageSize/filters/sort | PageResult<User> |
 | usersGet | userId? (без id — текущий) | user |
 | usersUpdate | userId, changes, expectedVersion | user |
 | usersGetCreatedRequests | userId?, page/pageSize/filters/sort | PageResult<RequestSummary> |
@@ -411,6 +411,9 @@ ASSIGNED означает персонального ответственног�
 
 TODO(NAUMEN-DIRECTORY), TODO(PROFILE-EDIT).
 
+Строки «зарезервировано» описывают возможное расширение контракта, но не имеют frontend/Groovy
+реализации в текущем проекте и не должны публиковаться как рабочие функции.
+
 ### Файлы
 
 | Функция | Запрос | data |
@@ -419,7 +422,10 @@ TODO(NAUMEN-DIRECTORY), TODO(PROFILE-EDIT).
 | filesGet | attachmentId | metadata и/или проверенная ссылка/контент |
 | filesDelete | attachmentId, expectedVersion? | deleted:true |
 
-Это проектные функции. До проверки реального Naumen FileAdapter может существовать только как интерфейс с неподдерживаемой реализацией. Base64 допускается лишь для малого прототипного лимита. Сервер проверяет декодированный размер, сигнатуру, MIME, расширение, безопасное имя, право на entityId и при наличии запускает антивирусную проверку.
+Это зарезервированный, а не рабочий контракт. Текущий `FileFunctions.groovy` всегда возвращает
+`FILES_INTEGRATION_UNAVAILABLE`; `FilesApi` и `FileUploader` намеренно не созданы. Поля таблицы
+описывают только возможную форму будущего адаптера и не подтверждают Base64, multipart, download
+URL или методы текущей установки.
 
 TODO(NAUMEN-FILES): endpoint, streaming, хранение, download response, temporary uploads, AV и лимиты.
 
