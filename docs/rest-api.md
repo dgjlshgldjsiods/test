@@ -116,7 +116,7 @@ TODO(NAUMEN-AUTH): AuthenticationAdapter. TODO(NAUMEN-SESSION): SessionRepositor
 
     {
       "folders": [{"id":"folder$1","title":{"ru":"...","en":"..."},"parentFolderId":null,"sortOrder":0}],
-      "services": [{"id":"service$1","title":{"ru":"...","en":"..."},"shortDescription":{"ru":"...","en":"..."},"icon":"support","folderId":"folder$1","status":"PUBLISHED","sortOrder":0}]
+      "services": [{"id":"service$1","title":{"ru":"...","en":"..."},"shortDescription":{"ru":"...","en":"..."},"icon":"support","folderId":"folder$1","formId":"form$1","formVersionId":"formVersion$2","status":"PUBLISHED","sortOrder":0}]
     }
 
 В ответ пользовательского каталога не включаются внутренние назначения, SLA-настройки или списки audience, если они не нужны интерфейсу. Конкретное построение server-side scope в Naumen остаётся `TODO(NAUMEN-CATALOG)` и `TODO(NAUMEN-DIRECTORY)`.
@@ -173,6 +173,8 @@ TODO(NAUMEN-STORAGE), TODO(NAUMEN-DIRECTORY).
 | formsCloneVersion | formId, sourceVersionId, expectedFormVersion | draftVersion |
 | formsSaveDraft | formId, formVersionId, schema, expectedVersion | draftVersion |
 | formsPublishVersion | formId, formVersionId, expectedVersion | form, publishedVersion |
+
+Для обычного пользователя `formsGetVersion` требует одновременно `formVersionId` и `serviceId`. Проектный адаптер возвращает JSON только если услуга доступна пользователю, имеет статус `PUBLISHED`, ссылается именно на эту версию и версия также `PUBLISHED`. Передача одного `formVersionId` обычным пользователем не разрешает чтение версии. Административный контракт для `FORM_ADMIN` сохраняется.
 
 formsCreateVersion/Clone назначают versionNumber на сервере. Save разрешен только активному DRAFT. Publish валидирует безопасную schema и выполняется атомарно. VERSION_CONFLICT возвращается и при конкурирующем создании второго DRAFT.
 
@@ -242,6 +244,20 @@ formsGet принимает formId. formsGetVersions принимает formId, 
 
 requestsCreate использует requestId как idempotency key. Сервер заново проверяет услугу, доступность, конкретную опубликованную версию, allowlist полей, обязательность, типы, requestedFor и вложения. fieldValues не превращаются в произвольные имена атрибутов без schema mapping в RequestRepository.
 
+Контракт этапа 10:
+
+    requestsCreate {
+      "serviceId":"service$1",
+      "formId":"form$1",
+      "formVersionId":"formVersion$2",
+      "fieldValues":{"subject":"...","requestedFor":"user$1"},
+      "attachmentIds":[]
+    }
+
+Успех возвращает Request summary как минимум с `id` (допускается совместимый `entityId`). `authorId`, назначения и SLA нельзя передавать с клиента: сервер получает автора из сессии, заново загружает доступную опубликованную услугу и её неизменяемую форму. `SubmissionValidator` проверяет schema allowlist, обязательность, типы, visible/required expressions, вычисляемые поля, dictionaryCode и допустимость каждого справочного ID. `RequestRepository.createIdempotent` атомарно использует транспортный `requestId`; повтор того же ключа возвращает исходный результат.
+
+На этапе 10 `attachmentIds` обязан быть пустым. Непустой список возвращает `VALIDATION_ERROR`, пока `TODO(NAUMEN-FILES)` не закрыт.
+
 requestsGetList применяет объектный scope на сервере. Клиентский scope — подсказка и не расширяет доступ.
 
 TODO(REQUEST-VISIBILITY), TODO(NAUMEN-STORAGE), TODO(IDEMPOTENCY).
@@ -282,6 +298,8 @@ TODO(NAUMEN-CALENDAR), TODO(SLA-DEFAULT), TODO(NAUMEN-TXN).
 | dictionariesGetDepartments | search/page/pageSize | PageResult<EntityRef> |
 | dictionariesGetItems | dictionaryCode, search/page/pageSize | PageResult<DictionaryItem> |
 | dictionariesSearchUsers | search/page/pageSize/organizationIds/departmentIds/activeOnly | PageResult<EntityRef> |
+
+Для SurveyJS разрешены только проектные коды `REQUEST_USERS`, `REQUEST_GROUPS`, `REQUEST_DEPARTMENTS`, `REQUEST_ORGANIZATIONS`. Они вызываются через `dictionariesGetItems`; `DirectoryAdapter.findRequestDictionaryItems` обязан применять пользовательский scope и возвращать только `{id,title}`. `choicesByUrl` и произвольные URL схемы запрещены. `SLA_POLICIES` остаётся административным кодом и требует `CATALOG_ADMIN`/`SYSTEM_ADMIN`.
 
 dictionaryCode проверяется по серверному allowlist. usersUpdate принимает только разрешенные поля для роли вызывающего.
 
