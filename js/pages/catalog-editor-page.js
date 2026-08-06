@@ -141,7 +141,7 @@ if (page?.accessStatus === 'ready') {
       const originalStatus = service?.status || 'DRAFT';
       const originalAvailability = normalizeAvailability(service?.availability);
       const form = createElement('form', { className: 'card border-0 shadow-sm service-editor' });
-      form.innerHTML = `<div class="card-header bg-body d-flex justify-content-between"><h2 class="h5 mb-0">${I18n.t(service ? 'catalogEditor.editService' : 'catalogEditor.createService')}</h2><span class="badge text-bg-secondary">${originalStatus}</span></div>
+      form.innerHTML = `<div class="card-header bg-body d-flex justify-content-between"><h2 class="h5 mb-0">${I18n.t(service ? 'catalogEditor.editService' : 'catalogEditor.createService')}</h2><span class="badge text-bg-secondary current-status"></span></div>
         <div class="card-body row g-3">
           ${inputMarkup('code', I18n.t('catalogEditor.code'), 'text', true)}
           ${inputMarkup('titleRu', I18n.t('catalogEditor.titleRu'), 'text', true)}
@@ -159,6 +159,7 @@ if (page?.accessStatus === 'ready') {
           ${selectMarkup('availabilityMode', I18n.t('catalogEditor.availability'), ['ALL','RESTRICTED'], originalAvailability.mode)}
           <div class="col-12 restricted-audience"><div class="row g-3"><div class="col-md-4" data-slot="users"></div><div class="col-md-4" data-slot="departments"></div><div class="col-md-4" data-slot="organizations"></div></div></div>
         </div><div class="card-footer bg-body d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">${I18n.t('common.save')}</button><button class="btn btn-outline-secondary cancel-editor" type="button">${I18n.t('common.cancel')}</button></div>`;
+      form.querySelector('.current-status').textContent = originalStatus;
       form.elements.code.value = service?.code || '';
       form.elements.titleRu.value = localized(service?.title, 'ru', '');
       form.elements.titleEn.value = localized(service?.title, 'en', '');
