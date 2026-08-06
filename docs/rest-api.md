@@ -231,10 +231,10 @@ formsGet принимает formId. formsGetVersions принимает formId, 
 |---|---|---|
 | requestsGetList | page/pageSize/filters/sort | PageResult<RequestSummary> |
 | requestsCreate | serviceId, formId, formVersionId, fieldValues, attachmentIds? | request |
-| requestsGet | entityId | request, service, formVersion |
+| requestsGet | entityId | request, service |
 | requestsChangeStatus | entityId, newStatus, comment?, expectedVersion | request |
 | requestsChangeAssignment | entityId, responsibleGroupId, assigneeId?, expectedVersion | request |
-| requestsAddComment | entityId, comment:{type,text}, expectedVersion? | comment |
+| requestsAddComment | entityId, comment:{type,text}, expectedVersion | comment, request |
 | requestsGetComments | entityId, page/pageSize | PageResult<Comment> |
 | requestsGetHistory | entityId, page/pageSize | PageResult<HistoryEvent> |
 | requestsGetAttachments | entityId | attachments[] |
@@ -290,6 +290,39 @@ USER получает доступные ему объекты, OPERATOR — н�
 `DirectoryAdapter.getRequestAccessContext` и `RequestRepository.findVisiblePage` — проектные
 адаптеры, а не встроенные API Naumen. Их привязка остаётся TODO(REQUEST-VISIBILITY) и
 TODO(NAUMEN-STORAGE); создание также сохраняет TODO(IDEMPOTENCY).
+
+Контракт карточки этапа 12:
+
+    requestsGet { "entityId":"request$1" }
+    formsGetVersion { "formVersionId":"formVersion$2", "requestEntityId":"request$1" }
+    requestsChangeStatus {
+      "entityId":"request$1", "newStatus":"IN_PROGRESS",
+      "comment":"Принята в работу", "expectedVersion":8
+    }
+    requestsChangeAssignment {
+      "entityId":"request$1", "responsibleGroupId":"group$2",
+      "assigneeId":"user$3", "expectedVersion":9
+    }
+    requestsAddComment {
+      "entityId":"request$1", "comment":{"type":"PUBLIC","text":"..."},
+      "expectedVersion":10
+    }
+
+`requestsGetComments` и `requestsGetHistory` принимают `entityId`, `page`, `pageSize` и возвращают
+`PageResult`. `requestsGetAttachments` возвращает только безопасные метаданные вложений;
+загрузка/скачивание не заявлены до реализации `TODO(NAUMEN-FILES)`. `requestsGetSla` возвращает
+серверный snapshot с дедлайнами, признаками нарушения/паузы и оставшимся рабочим временем в минутах.
+
+USER читает только доступную заявку и публичные комментарии. OPERATOR/SYSTEM_ADMIN при наличии
+права обработки видят внутренние комментарии и внутренние события, меняют статус/назначение и
+добавляют INTERNAL. PUBLIC требует права чтения. Все изменения атомарно сравнивают
+`expectedVersion`; несовпадение возвращает `VERSION_CONFLICT`. Поля `fieldValues` не имеют
+операции изменения и отображаются через неизменяемую FormVersion в режиме read-only.
+
+`RequestRepository.findVisibleDetails`, `findReadableFormVersion`, `canProcess`, атомарные
+мутации, страницы комментариев/истории и SLA snapshot — проектные адаптеры, не встроенные API
+Naumen. Их сопоставление с ACL, объектами, историей и календарями остаётся
+`TODO(REQUEST-VISIBILITY)`, `TODO(NAUMEN-STORAGE)` и `TODO(NAUMEN-CALENDAR)`.
 
 ### SLA и календари
 
