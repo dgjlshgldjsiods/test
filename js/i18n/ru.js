@@ -88,5 +88,27 @@ export const ru = Object.freeze({
     serverValidationError: 'Сервер отклонил значения формы. Проверьте введённые данные.',
     submitError: 'Не удалось создать заявку.', attachments: 'Вложения', chooseFiles: 'Выбрать файлы',
     attachmentsUnavailable: 'Файловый адаптер Naumen ещё не подтверждён. Добавление вложений временно недоступно.'
+  },
+  requests: {
+    apply: 'Применить', moreFilters: 'Ещё фильтры', empty: 'Заявки по заданным условиям не найдены.',
+    loadError: 'Не удалось загрузить список заявок.',
+    filters: {
+      search: 'Поиск', number: 'Номер', status: 'Статус', any: 'Любое значение', title: 'Название',
+      service: 'Услуга', author: 'Автор', requestedFor: 'Заказчик', group: 'Рабочая группа',
+      assignee: 'Ответственный', createdFrom: 'Создана с', createdTo: 'Создана по',
+      slaBreached: 'Нарушение SLA', reactionFrom: 'Реакция с', reactionTo: 'Реакция по',
+      resolutionFrom: 'Решение с', resolutionTo: 'Решение по'
+    },
+    filterValue: { true: 'Нарушен', false: 'Не нарушен' },
+    columns: {
+      number: 'Номер', title: 'Название', service: 'Услуга', author: 'Автор', status: 'Статус',
+      group: 'Рабочая группа', assignee: 'Ответственный', reaction: 'Срок реакции',
+      resolution: 'Срок решения', sla: 'SLA', createdAt: 'Создана'
+    },
+    status: {
+      NEW: 'Новая', REGISTERED: 'Зарегистрирована', IN_PROGRESS: 'В работе', WAITING_USER: 'Ожидает пользователя',
+      RESOLVED: 'Решена', CLOSED: 'Закрыта', CANCELLED: 'Отменена', UNKNOWN: 'Неизвестно'
+    },
+    sla: { paused: 'Приостановлен', breached: 'Нарушен', onTime: 'В срок' }
   }
 });
