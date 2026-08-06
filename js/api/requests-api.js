@@ -6,4 +6,8 @@ export class RequestsApi {
       serviceId, formId, formVersionId, fieldValues, attachmentIds
     });
   }
+
+  getList(request = {}) {
+    return this.apiClient.exec('requestsGetList', request);
+  }
 }
