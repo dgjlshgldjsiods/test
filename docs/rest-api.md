@@ -123,6 +123,31 @@ TODO(NAUMEN-AUTH): AuthenticationAdapter. TODO(NAUMEN-SESSION): SessionRepositor
 
 TODO(NAUMEN-STORAGE), TODO(NAUMEN-DIRECTORY).
 
+Контракты административного редактора этапа 8:
+
+    catalogGetTree {"includeArchived":true,"includeDrafts":true}
+      -> {"folders":[],"services":[]}
+
+    catalogCreateFolder {"folder":{"title":{"ru":"...","en":"..."},"parentFolderId":null,"sortOrder":0}}
+    catalogUpdateFolder {"folderId":"folder$1","changes":{...},"expectedVersion":3}
+    catalogDeleteFolder {"folderId":"folder$1","expectedVersion":3}
+
+    catalogCreateService {"service":{"code":"...","folderId":"folder$1","formId":"form$1",
+      "formVersionId":"formVersion$2","responsibleGroupId":"group$1","defaultAssigneeId":"user$1",
+      "slaPolicyId":"sla$1","status":"DRAFT","sortOrder":10,
+      "availability":{"mode":"RESTRICTED","userIds":[],"departmentIds":[],"organizationIds":[]}}}
+
+    catalogUpdateService {"serviceId":"service$1","changes":{...},"expectedVersion":4}
+    catalogMoveService {"serviceId":"service$1","targetFolderId":"folder$2","expectedVersion":5}
+    catalogChangeServiceStatus {"serviceId":"service$1","status":"PUBLISHED","expectedVersion":6}
+    catalogUpdateServiceAvailability {"serviceId":"service$1","availability":{...},"expectedVersion":7}
+
+`catalogRepository` выполняет все проверки изменения атомарно. Удаление непустой папки возвращает `DEPENDENCY_EXISTS`; несовпадение версии — `VERSION_CONFLICT`. При публикации адаптер повторно проверяет существование папки, опубликованный `formVersionId`, принадлежность версии `formId`, группу, ответственного и SLA-политику. Перемещение не меняет порядок автоматически: `sortOrder` остаётся явным полем услуги.
+
+`availability.mode=ALL` канонически хранится с пустыми массивами. Для `RESTRICTED` сервер валидирует существование всех ссылок. Проверка на frontend предназначена только для UX; сервер остаётся источником истины.
+
+Селекторы этапа 8 используют `dictionariesGetGroups`, `dictionariesGetOrganizations`, `dictionariesGetDepartments`, `dictionariesSearchUsers` и `dictionariesGetItems`. Для SLA-политик введён проектный `dictionaryCode=SLA_POLICIES`; это не известный справочник Naumen. Его сопоставление выполняет `DirectoryAdapter` и остаётся `TODO(NAUMEN-DIRECTORY)`. Все списки возвращают общий `PageResult<EntityRef>` и ограничиваются 100 элементами на запрос.
+
 ### Формы и версии
 
 | Функция | Запрос | data |
