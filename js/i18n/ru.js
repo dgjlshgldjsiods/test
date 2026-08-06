@@ -72,5 +72,11 @@ export const ru = Object.freeze({
     users: 'Пользователи', departments: 'Подразделения', organizations: 'Организации', notSelected: 'Не выбрано',
     move: 'Переместить услугу', saveBeforeMove: 'Сохраните или отмените текущие изменения перед перемещением.',
     finishEditing: 'Сначала сохраните или отмените текущие изменения.'
+  },
+  serviceCatalog: {
+    loadError: 'Не удалось загрузить доступные услуги.', searchPlaceholder: 'Поиск по каталогу',
+    viewMode: 'Режим отображения', cards: 'Карточки', list: 'Список', folders: 'Папки каталога',
+    allServices: 'Все услуги', breadcrumbs: 'Навигационная цепочка', root: 'Каталог',
+    empty: 'В этой папке нет доступных услуг.', searchEmpty: 'По вашему запросу ничего не найдено.'
   }
 });
