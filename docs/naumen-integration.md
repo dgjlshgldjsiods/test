@@ -2,7 +2,7 @@
 
 ## Статус
 
-На этапе 3 реализован только браузерный транспорт NaumenApiClient. Предметные API, серверные Groovy-функции и подтверждение работы на реальном Naumen отсутствуют.
+Реализованы браузерный транспорт NaumenApiClient, предметные API и проектные Groovy entry-функции. Подтверждение внутренних адаптеров и сквозной работы на реальной установке Naumen отсутствует.
 
 ## Конфигурация
 
@@ -33,7 +33,7 @@ NaumenApiError содержит kind, code, status, requestId, fieldErrors и de
 - timeout: TIMEOUT;
 - abort: REQUEST_ABORTED.
 
-При HTTP 401, INVALID_SESSION и SESSION_EXPIRED AuthSession очищается. Переход на login.html намеренно не реализован: это ответственность следующего этапа авторизации. При необходимости вызывающий может передать onSessionInvalid.
+При HTTP 401, INVALID_SESSION и SESSION_EXPIRED AuthSession очищается. Переданный из `auth.js` callback `onSessionInvalid` выполняет переход на `login.html`; защищённые страницы дополнительно проверяют сессию до бизнес-рендера.
 
 ## Отмена и timeout
 
@@ -48,7 +48,7 @@ Debug-лог содержит только functionName, requestId и код о�
 - TODO(NAUMEN-CORS): проверить Origin, Content-Type и X-Request-ID.
 - TODO(NAUMEN-HTTP): проверить реальные HTTP status и формат пустых ответов exec-post.
 - TODO(NAUMEN-BODY): подтвердить передачу JSON как requestContent для params=requestContent,user.
-- TODO(NAUMEN-AUTH): реализовать проектные функции authLogin/authRefresh/authLogout/authGetCurrentUser.
+- TODO(NAUMEN-AUTH): привязать проектные функции authLogin/authRefresh/authLogout/authGetCurrentUser к подтверждённому механизму установки.
 - TODO(NAUMEN-SESSION): определить серверное хранение, TTL, отзыв и rotation.
 
 Ни одно имя внутреннего класса или метода Naumen в клиенте не используется и не предполагается.
