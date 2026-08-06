@@ -8,6 +8,7 @@ export const ROLES = Object.freeze({
 });
 
 export const PAGE_ROLES = Object.freeze({
+  requests: Object.freeze([ROLES.USER, ROLES.OPERATOR]),
   catalogEditor: Object.freeze([ROLES.CATALOG_ADMIN]),
   forms: Object.freeze([ROLES.FORM_ADMIN]),
   formEditor: Object.freeze([ROLES.FORM_ADMIN]),
