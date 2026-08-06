@@ -2,7 +2,7 @@ export const en = Object.freeze({
   common: {
     appName: 'ITSM', prototype: 'Prototype', user: 'User',
     logout: 'Sign out', cancel: 'Cancel', continue: 'Continue', close: 'Close',
-    search: 'Search', retry: 'Retry', edit: 'Edit', yes: 'Yes', no: 'No',
+    search: 'Search', retry: 'Retry', edit: 'Edit', save: 'Save', yes: 'Yes', no: 'No',
     skipToContent: 'Skip to content', language: 'Language', theme: 'Theme',
     lightTheme: 'Light', darkTheme: 'Dark', stageCaption: 'Basic interface structure'
   },
@@ -56,5 +56,21 @@ export const en = Object.freeze({
     commandError: 'The operation failed.', loadError: 'Could not load the form.',
     missingFormId: 'Form identifier is missing.', metadataRequired: 'Enter the code and Russian form title.',
     creatorUnavailable: 'SurveyJS Creator failed to load. Check CDN access.'
+  },
+  catalogEditor: {
+    tree: 'Catalog tree', newRootFolder: 'New folder', newSubfolder: 'Create subfolder',
+    newService: 'Create service', createFolder: 'Create folder', editFolder: 'Edit folder',
+    createService: 'Create service', editService: 'Edit service', deleteFolder: 'Delete folder',
+    deleteConfirm: 'Delete the empty folder?', folderNotEmpty: 'Only an empty folder can be deleted.',
+    empty: 'The catalog is empty.', chooseItem: 'Select a tree item or create one.',
+    loadError: 'Could not load the catalog tree.', itemLoadError: 'Could not load the catalog item.',
+    commandError: 'Could not save changes.', versionConflict: 'Another user has changed this object. Reload the tree.',
+    titleRu: 'Title (RU)', titleEn: 'Title (EN)', shortRu: 'Short description (RU)', shortEn: 'Short description (EN)',
+    descriptionRu: 'Description (RU)', descriptionEn: 'Description (EN)', icon: 'Icon code',
+    code: 'Code', sortOrder: 'Display order', status: 'Status', form: 'Form', formVersion: 'Published form version',
+    group: 'Work group', assignee: 'Assignee', sla: 'SLA policy', availability: 'Availability',
+    users: 'Users', departments: 'Departments', organizations: 'Organizations', notSelected: 'Not selected',
+    move: 'Move service', saveBeforeMove: 'Save or discard the current changes before moving the service.',
+    finishEditing: 'Save or cancel the current changes first.'
   }
 });
