@@ -1,7 +1,8 @@
 /**
  * Entry-функции форм и версий для modules.newItsmTest.forms*.
  *
- * formRepository, sessionRepository, permissionAdapter, catalogRepository и directoryAdapter — проектные порты,
+ * formRepository, sessionRepository, permissionAdapter, catalogRepository,
+ * requestRepository и directoryAdapter — проектные порты,
  * а не встроенные API Naumen.
  * formRepository обязан атомарно проверять expectedVersion, назначать
  * versionNumber и гарантировать единственный активный DRAFT.
@@ -21,6 +22,7 @@ class FormFunctions {
     def permissionAdapter
     def formSchemaValidator
     def catalogRepository
+    def requestRepository
     def directoryAdapter
     def logger
 
@@ -98,6 +100,13 @@ class FormFunctions {
             Map version
             if (access.currentUser.roles.any { ['FORM_ADMIN', 'SYSTEM_ADMIN'].contains(it) }) {
                 version = formRepository.findVersionById(versionId, access.currentUser)
+            } else if (requestContent?.requestEntityId) {
+                String requestEntityId = requiredId(requestContent.requestEntityId, 'requestEntityId')
+                // Project adapter verifies object-level request read access and
+                // that this immutable version is the one stored on the request.
+                version = requestRepository.findReadableFormVersion(
+                    requestEntityId, versionId, access.currentUser, formRepository
+                )
             } else {
                 String serviceId = requiredId(requestContent?.serviceId, 'serviceId')
                 Map userContext = directoryAdapter.getCatalogAccessContext(access.currentUser.id)
