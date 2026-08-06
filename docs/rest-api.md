@@ -341,7 +341,9 @@ Naumen. Их сопоставление с ACL, объектами, истори
 | calendarsGet | calendarId | calendar |
 | calendarsCalculateDeadline | calendarId, startAt, durationMinutes | deadline |
 
-slaCheckConflicts возвращает эвристическое предупреждение, не доказательство отсутствия пересечений. calendarsCalculateDeadline является проектным контрактом, не известным встроенным API.
+slaGetRules дополнительно возвращает `rulesVersion`, используемый как `expectedVersion` единой операции reorder. В update поле `enabled` включает или отключает правило; отдельного REST-метода для переключения нет. Все условия проверяются по allowlist полей и операторов. `slaTestRules` всегда выполняет серверное сопоставление и возвращает первое и все совпадения.
+
+slaCheckConflicts возвращает элементы `{ruleIds, approximate:true}`: это эвристическое предупреждение, а не доказательство отсутствия пересечений. calendarsCalculateDeadline и остальные обращения к календарям являются проектными контрактами `CalendarAdapter`, а не известными встроенными API Naumen. Клиентский matcher не рассчитывает рабочее время.
 
 TODO(NAUMEN-CALENDAR), TODO(SLA-DEFAULT), TODO(NAUMEN-TXN).
 
