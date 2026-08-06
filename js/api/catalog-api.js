@@ -2,6 +2,10 @@ export class CatalogApi {
   constructor(apiClient) { this.apiClient = apiClient; }
   getTree(options = {}) { return this.apiClient.exec('catalogGetTree', options); }
   getAvailableTree(search = '') { return this.apiClient.exec('catalogGetAvailableTree', { search }); }
+  async getAvailableService(serviceId) {
+    const tree = await this.getAvailableTree('');
+    return (tree?.services || []).find((service) => service.id === serviceId) || null;
+  }
   getFolder(folderId) { return this.apiClient.exec('catalogGetFolder', { folderId }); }
   createFolder(folder) { return this.apiClient.exec('catalogCreateFolder', { folder }); }
   updateFolder(folderId, changes, expectedVersion) { return this.apiClient.exec('catalogUpdateFolder', { folderId, changes, expectedVersion }); }
