@@ -72,5 +72,11 @@ export const en = Object.freeze({
     users: 'Users', departments: 'Departments', organizations: 'Organizations', notSelected: 'Not selected',
     move: 'Move service', saveBeforeMove: 'Save or discard the current changes before moving the service.',
     finishEditing: 'Save or cancel the current changes first.'
+  },
+  serviceCatalog: {
+    loadError: 'Could not load available services.', searchPlaceholder: 'Search the catalog',
+    viewMode: 'View mode', cards: 'Cards', list: 'List', folders: 'Catalog folders',
+    allServices: 'All services', breadcrumbs: 'Breadcrumbs', root: 'Catalog',
+    empty: 'This folder has no available services.', searchEmpty: 'No services match your search.'
   }
 });
