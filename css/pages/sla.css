@@ -1,1 +1,3 @@
-/* Стили страницы sla будут добавлены в соответствующем вертикальном этапе. */
+.sla-page .sla-service { max-width: 28rem; }
+.sla-page [data-result] { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sla-condition .form-select, .sla-condition .form-control { min-width: 8rem; }
