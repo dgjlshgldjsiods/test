@@ -22,6 +22,13 @@ QUnit.module('Permissions', () => {
     assert.true(hasAnyRole({ roles: [ROLES.USER] }, []));
   });
 
+  QUnit.test('список заявок доступен ролям заявок и системному администратору', (assert) => {
+    assert.true(hasAnyRole([ROLES.USER], PAGE_ROLES.requests));
+    assert.true(hasAnyRole([ROLES.OPERATOR], PAGE_ROLES.requests));
+    assert.true(hasAnyRole([ROLES.SYSTEM_ADMIN], PAGE_ROLES.requests));
+    assert.false(hasAnyRole([ROLES.FORM_ADMIN], PAGE_ROLES.requests));
+  });
+
   QUnit.test('разделы администратора изолированы', (assert) => {
     const catalogAdmin = { roles: [ROLES.CATALOG_ADMIN] };
     assert.true(canAccessAdminSection(catalogAdmin, 'catalogEditor'));
