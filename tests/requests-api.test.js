@@ -25,4 +25,27 @@ QUnit.module('RequestsApi', () => {
     await api.getList(command);
     assert.deepEqual(calls, [{ name: 'requestsGetList', body: command }]);
   });
+
+  QUnit.test('request card operations preserve entityId and expectedVersion in bodies', async (assert) => {
+    const calls = [];
+    const api = new RequestsApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({}); } });
+    await api.get('request$1');
+    await api.changeStatus('request$1', 'IN_PROGRESS', 4, 'Taken');
+    await api.changeAssignment('request$1', 'group$2', 'user$3', 5);
+    await api.addComment('request$1', 'INTERNAL', 'Note', 6);
+    await api.getComments('request$1', { page: 2, pageSize: 10 });
+    await api.getHistory('request$1', { page: 1, pageSize: 20 });
+    await api.getAttachments('request$1');
+    await api.getSla('request$1');
+    assert.deepEqual(calls, [
+      { name: 'requestsGet', body: { entityId: 'request$1' } },
+      { name: 'requestsChangeStatus', body: { entityId: 'request$1', newStatus: 'IN_PROGRESS', comment: 'Taken', expectedVersion: 4 } },
+      { name: 'requestsChangeAssignment', body: { entityId: 'request$1', responsibleGroupId: 'group$2', assigneeId: 'user$3', expectedVersion: 5 } },
+      { name: 'requestsAddComment', body: { entityId: 'request$1', comment: { type: 'INTERNAL', text: 'Note' }, expectedVersion: 6 } },
+      { name: 'requestsGetComments', body: { page: 2, pageSize: 10, entityId: 'request$1' } },
+      { name: 'requestsGetHistory', body: { page: 1, pageSize: 20, entityId: 'request$1' } },
+      { name: 'requestsGetAttachments', body: { entityId: 'request$1' } },
+      { name: 'requestsGetSla', body: { entityId: 'request$1' } }
+    ]);
+  });
 });
