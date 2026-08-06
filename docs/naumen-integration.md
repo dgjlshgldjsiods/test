@@ -12,6 +12,16 @@ js/config.js содержит baseUrl, accessKey, moduleName, requestTimeout и 
 
     Browser -> Application Backend/BFF -> Naumen Service Desk
 
+`baseUrl` — origin без `/services/rest/exec-post`; путь добавляет транспорт. `moduleName` должен
+точно совпадать с опубликованным модулем, по умолчанию `modules.newItsmTest`.
+
+## Публикация проектных функций
+
+Сначала публикуется `CommonFunctions`, затем entry-функции Auth, Dictionary, Form/Catalog, SLA,
+Request/User и в последнюю очередь fail-closed FileFunctions. До публикации каждой группы должны
+быть предоставлены соответствующие project adapters. Конкретные действия импорта, регистрации и
+выдачи accessKey зависят от версии Naumen и в доступной установке не проверялись.
+
 ## Вызов
 
 Клиент выполняет только:
@@ -50,5 +60,7 @@ Debug-лог содержит только functionName, requestId и код о�
 - TODO(NAUMEN-BODY): подтвердить передачу JSON как requestContent для params=requestContent,user.
 - TODO(NAUMEN-AUTH): привязать проектные функции authLogin/authRefresh/authLogout/authGetCurrentUser к подтверждённому механизму установки.
 - TODO(NAUMEN-SESSION): определить серверное хранение, TTL, отзыв и rotation.
+- TODO(NAUMEN-STORAGE/PERMISSIONS/DIRECTORY/CALENDAR/TXN): подключить предметные адаптеры и проверить транзакции.
+- TODO(NAUMEN-FILES): файловые функции остаются fail closed; см. `docs/naumen-files.md`.
 
 Ни одно имя внутреннего класса или метода Naumen в клиенте не используется и не предполагается.
