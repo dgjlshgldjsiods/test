@@ -35,6 +35,13 @@ QUnit.module('FormsApi', () => {
     assert.deepEqual(calls, [{ name: 'formsGetVersion', body: { formVersionId: 'version$1', serviceId: 'service$1' } }]);
   });
 
+  QUnit.test('историческая версия формы связана с доступной заявкой', async (assert) => {
+    const calls = [];
+    const api = new FormsApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({}); } });
+    await api.getRequestVersion('version$1', 'request$1');
+    assert.deepEqual(calls, [{ name: 'formsGetVersion', body: { formVersionId: 'version$1', requestEntityId: 'request$1' } }]);
+  });
+
   QUnit.test('команды редактора передают expectedVersion и schema только в тело', async (assert) => {
     const calls = [];
     const api = new FormsApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({}); } });
