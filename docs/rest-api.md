@@ -365,6 +365,36 @@ TODO(NAUMEN-CALENDAR), TODO(SLA-DEFAULT), TODO(NAUMEN-TXN).
 
 dictionaryCode проверяется по серверному allowlist. usersUpdate принимает только разрешенные поля для роли вызывающего.
 
+Контракт профиля этапа 13:
+
+    usersGet {}                                      // текущий пользователь
+    usersGet { "userId":"user$2" }                 // только SYSTEM_ADMIN для чужого
+    usersUpdate {
+      "userId":"user$2",
+      "changes":{
+        "title":"...", "email":"...", "phone":"...", "active":true,
+        "organizationIds":["org$1"], "departmentId":"department$1",
+        "groupIds":["group$1"], "roles":["USER","OPERATOR"],
+        "language":"ru", "timezone":"Europe/Moscow"
+      },
+      "expectedVersion":7
+    }
+
+Обычный пользователь может вызвать `usersUpdate` для себя только с `language` и `timezone`.
+Передача защищённых полей без SYSTEM_ADMIN возвращает `FORBIDDEN`; поля не игнорируются молча.
+Даже SYSTEM_ADMIN не меняет через этот контракт `id` или `login`. Изменения используют optimistic
+lock и возвращают `VERSION_CONFLICT` при несовпадении версии.
+
+`usersGetCreatedRequests`, `usersGetAssignedRequests` и `usersGetGroupRequests` принимают
+`userId`, `page`, `pageSize`, `filters`, `sort`. Чужой `userId` доступен только SYSTEM_ADMIN.
+ASSIGNED означает персонального ответственного независимо от группы; GROUP — заявки доверенно
+вычисленных групп пользователя независимо от assignee. ACL, фильтрация, сортировка, `COUNT` и
+`LIMIT/OFFSET` выполняются серверным repository до возврата DTO.
+
+`UserRepository.findProfile/updateProfileAtomic` и `RequestRepository.findUserRequestPage` —
+проектные адаптеры, не встроенные API Naumen. Маппинг пользователей и членства остаётся
+`TODO(NAUMEN-USERS)`, `TODO(NAUMEN-PERMISSIONS)` и `TODO(PROFILE-EDIT)`.
+
 TODO(NAUMEN-DIRECTORY), TODO(PROFILE-EDIT).
 
 ### Файлы
