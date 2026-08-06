@@ -5,4 +5,9 @@
 .catalog-node__children { border-inline-start: 1px solid var(--bs-border-color); margin-inline-start: .75rem; padding-inline-start: 1rem; }
 .catalog-service { padding: .35rem .25rem; }
 .remote-selector select[multiple] { min-height: 8rem; }
+.catalog-user-tree { max-height: 65vh; overflow: auto; }
+.catalog-card { border-color: var(--bs-border-color); color: var(--bs-body-color); transition: transform .15s ease, box-shadow .15s ease; }
+.catalog-card:hover, .catalog-card:focus-visible { transform: translateY(-2px); box-shadow: var(--bs-box-shadow-sm); }
+.catalog-card__icon { font-size: 1.5rem; min-height: 2rem; overflow-wrap: anywhere; }
+.service-catalog-page .input-group { max-width: 44rem; }
 @media (max-width: 575.98px) { .catalog-node__summary { align-items: flex-start; flex-direction: column; } }
