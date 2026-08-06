@@ -5,16 +5,61 @@
  * TODO(IDEMPOTENCY): подтвердить атомарное хранилище результатов requestId.
  * TODO(SURVEY-VALIDATION): реализовать серверный allowlist и валидацию values.
  * TODO(NAUMEN-FILES): вложения на этом этапе не принимаются.
+ * TODO(REQUEST-VISIBILITY): сопоставить правила видимости с объектными
+ * политиками и рабочими группами конкретной инсталляции Naumen.
  */
 class RequestFunctions {
     def requestRepository
     def catalogRepository
     def formRepository
     def directoryAdapter
+    def permissionAdapter
     def submissionValidator
     def sessionRepository
     def auditAdapter
     def logger
+
+    Map requestsGetList(Map requestContent, def user) {
+        String requestId = CommonFunctions.requestId(requestContent)
+        try {
+            Map currentUser = requireUser(requestContent, requestId)
+            if (currentUser.errorResponse) return currentUser.errorResponse
+            Set<String> roles = (currentUser.roles ?: []) as Set<String>
+            if (!roles.intersect(['USER', 'OPERATOR', 'SYSTEM_ADMIN'] as Set).size()) {
+                return CommonFunctions.errorResponse('FORBIDDEN', 'Недостаточно прав для просмотра заявок', [:], [], requestId)
+            }
+
+            int page = positiveInt(requestContent?.page, 1)
+            int pageSize = boundedPageSize(requestContent?.pageSize)
+            Map filters = normalizeFilters(requestContent?.filters)
+            List<Map> sort = normalizeSort(requestContent?.sort)
+            Map visibility = buildVisibility(currentUser, roles)
+
+            // Project repository must apply visibility, filters, sorting, count
+            // and LIMIT/OFFSET on the server. It must never fetch the full set.
+            Map result = requestRepository.findVisiblePage(
+                currentUser, visibility, filters, sort, page, pageSize,
+                requestContent?.language?.toString()
+            )
+            if (!(result instanceof Map) || !(result.items instanceof List)) {
+                throw new IllegalStateException('RequestRepository returned invalid page')
+            }
+            int total = result.total instanceof Number ? Math.max(0, result.total as int) : 0
+            Map data = [
+                items: result.items,
+                page: page,
+                pageSize: pageSize,
+                total: total,
+                totalPages: total == 0 ? 0 : (int) Math.ceil(total / (double) pageSize)
+            ]
+            return CommonFunctions.successResponse(data, requestId)
+        } catch (IllegalArgumentException exception) {
+            return validationError(exception.message, requestId)
+        } catch (Exception exception) {
+            logger?.error("requestsGetList failed, requestId=${requestId}, errorType=${exception.class.name}")
+            return CommonFunctions.errorResponse('INTERNAL_ERROR', 'Внутренняя ошибка сервера', [:], [], requestId)
+        }
+    }
 
     Map requestsCreate(Map requestContent, def user) {
         String requestId = CommonFunctions.requestId(requestContent)
@@ -87,7 +132,90 @@ class RequestFunctions {
             sessionRepository.revoke(session.id)
             return [errorResponse: CommonFunctions.errorResponse('SESSION_EXPIRED', 'Сессия истекла', [:], [], requestId)]
         }
-        return [id: session.userId]
+        List<String> roles = permissionAdapter?.getRoles(session.userId)
+        if (!(roles instanceof List)) throw new IllegalStateException('PermissionAdapter returned invalid roles')
+        return [id: session.userId, roles: roles.collect { it?.toString() }.findAll { it }]
+    }
+
+    private Map buildVisibility(Map currentUser, Set<String> roles) {
+        if (roles.contains('SYSTEM_ADMIN')) return [mode: 'ALL']
+        if (roles.contains('OPERATOR')) {
+            Map context = directoryAdapter.getRequestAccessContext(currentUser.id)
+            if (!(context instanceof Map)) throw new IllegalStateException('DirectoryAdapter returned invalid request context')
+            return [mode: 'OPERATOR', userId: currentUser.id, groupIds: idList(context.groupIds ?: []), policyIds: idList(context.policyIds ?: [])]
+        }
+        return [mode: 'USER', userId: currentUser.id]
+    }
+
+    private static Map normalizeFilters(def raw) {
+        if (raw != null && !(raw instanceof Map)) throw new IllegalArgumentException('filters должен быть JSON-объектом')
+        Map source = raw instanceof Map ? raw : [:]
+        List<String> statuses = source.statuses == null ? [] : idList(source.statuses)
+        Set<String> allowedStatuses = ['NEW', 'REGISTERED', 'IN_PROGRESS', 'WAITING_USER', 'RESOLVED', 'CLOSED', 'CANCELLED'] as Set
+        if (statuses.any { !allowedStatuses.contains(it) }) throw new IllegalArgumentException('Неизвестный статус заявки')
+        def breached = source.slaBreached
+        if (breached != null && !(breached instanceof Boolean)) throw new IllegalArgumentException('slaBreached должен быть boolean')
+        return [
+            search: shortText(source.search), number: shortText(source.number), title: shortText(source.title),
+            statuses: statuses, service: shortText(source.service), author: shortText(source.author),
+            requestedFor: shortText(source.requestedFor), responsibleGroup: shortText(source.responsibleGroup),
+            assignee: shortText(source.assignee), slaBreached: breached,
+            createdFrom: isoDate(source.createdFrom), createdTo: isoDate(source.createdTo),
+            reactionDeadlineFrom: isoDate(source.reactionDeadlineFrom), reactionDeadlineTo: isoDate(source.reactionDeadlineTo),
+            resolutionDeadlineFrom: isoDate(source.resolutionDeadlineFrom), resolutionDeadlineTo: isoDate(source.resolutionDeadlineTo)
+        ]
+    }
+
+    private static List<Map> normalizeSort(def raw) {
+        Set<String> allowed = ['number', 'title', 'serviceTitle', 'authorTitle', 'status', 'responsibleGroupTitle',
+            'assigneeTitle', 'reactionDeadline', 'resolutionDeadline', 'createdAt'] as Set
+        List input = raw instanceof List ? raw : []
+        if (input.size() > 3) throw new IllegalArgumentException('Допускается не более трёх полей сортировки')
+        List<Map> result = input.collect { item ->
+            if (!(item instanceof Map) || !allowed.contains(item.field?.toString())) throw new IllegalArgumentException('Недопустимое поле сортировки')
+            String direction = item.direction?.toString()?.toLowerCase()
+            if (!(direction in ['asc', 'desc'])) throw new IllegalArgumentException('Недопустимое направление сортировки')
+            [field: item.field.toString(), direction: direction]
+        }
+        return result ?: [[field: 'createdAt', direction: 'desc']]
+    }
+
+    private static int positiveInt(def value, int fallback) {
+        if (value == null) return fallback
+        try {
+            BigDecimal decimal = new BigDecimal(value.toString())
+            if (decimal.stripTrailingZeros().scale() > 0 || decimal > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException('page должен быть положительным целым числом')
+            }
+            int parsed = decimal.intValueExact()
+            if (parsed < 1) throw new IllegalArgumentException('page должен быть положительным числом')
+            return parsed
+        } catch (ArithmeticException | NumberFormatException ignored) {
+            throw new IllegalArgumentException('page должен быть положительным числом')
+        }
+    }
+
+    private static int boundedPageSize(def value) {
+        int size = positiveInt(value, 20)
+        if (size > 100) throw new IllegalArgumentException('pageSize не должен превышать 100')
+        return size
+    }
+
+    private static String shortText(def value) {
+        String text = value?.toString()?.trim()
+        if (text?.length() > 200) throw new IllegalArgumentException('Значение фильтра слишком длинное')
+        return text ?: null
+    }
+
+    private static Date isoDate(def value) {
+        if (value == null || !value.toString().trim()) return null
+        try { return java.time.Instant.parse(value.toString()).toDate() }
+        catch (Exception ignored) { throw new IllegalArgumentException('Дата должна быть в ISO 8601 с часовым поясом') }
+    }
+
+    private static List<String> idList(def value) {
+        if (!(value instanceof Collection)) throw new IllegalArgumentException('Ожидался JSON-массив')
+        return value.collect { it?.toString()?.trim() }.findAll { it }.unique()
     }
 
     private static String requiredId(def value, String field) {
