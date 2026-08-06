@@ -1,6 +1,6 @@
 # Архитектура прототипа ITSM
 
-Статус: актуализировано по итогам этапа 14.
+Статус: актуализировано по итогам этапа 15 (файловая интеграция заблокирована до проверки установки).
 Источник требований: docs/requirements.md.
 Реализованы базовый frontend, транспорт, авторизация, локализация, формы, каталоги, заявки, карточка пользователя и редактор SLA. Файловый механизм не реализован.
 
@@ -402,7 +402,8 @@ matchSlaRules фильтрует enabled, стабильно сортирует 
     │   ├── permissions.md
     │   ├── security.md
     │   ├── running.md
-    │   └── naumen-integration.md
+    │   ├── naumen-integration.md
+    │   └── naumen-files.md
     └── README.md
 
 Фигурные обозначения в дереве — сокращение документа, а не буквальные имена каталогов/файлов.
@@ -417,7 +418,7 @@ matchSlaRules фильтрует enabled, стабильно сортирует 
 - requests: requestsGetList, requestsCreate, requestsGet, requestsChangeStatus, requestsChangeAssignment, requestsAddComment, requestsGetComments, requestsGetHistory, requestsGetAttachments, requestsAddAttachment, requestsGetSla, requestsRecalculateSla.
 - SLA/calendar: slaGetRules, slaGetRule, slaCreateRule, slaUpdateRule, slaDeleteRule, slaReorderRules, slaTestRules, slaCheckConflicts, slaCalculateForRequest, calendarsGetList, calendarsGet, calendarsCalculateDeadline.
 - users/directories: usersGetList, usersGet, usersUpdate, usersGetCreatedRequests, usersGetAssignedRequests, usersGetGroupRequests, dictionariesGetGroups, dictionariesGetOrganizations, dictionariesGetDepartments, dictionariesGetItems, dictionariesSearchUsers.
-- files: filesUpload, filesGet, filesDelete. Все три являются проектными контрактами; TODO(NAUMEN-FILES).
+- files: зарезервированы filesUpload, filesGet, filesDelete. Сейчас entry-функции fail closed с `FILES_INTEGRATION_UNAVAILABLE`; это не рабочий API. `FileAdapter` остаётся проектным портом до подтверждения текущей установки — см. `docs/naumen-files.md` и TODO(NAUMEN-FILES).
 
 ## 10. План вертикальной реализации
 
