@@ -44,6 +44,8 @@ Groovy-файлы используют названия authenticationAdapter, s
 - Сервер повторно загружает неизменяемую formVersion, проверяет только объявленные поля, типы, required/visible rules и допустимые значения.
 - TODO(SURVEY-EXPRESSIONS): утвердить точный поднабор expression engine и защиту от чрезмерно сложных выражений.
 
+На этапе 10 клиентский `safe-survey-schema` допускает только стандартные вопросные типы, фиксированные `REQUEST_*` справочники и выражения без вызовов функций/скобок. Он отклоняет event-свойства, active content, `choicesByUrl` и строки с внешними схемами URL до создания `Survey.Model`. Это defense in depth: проектный серверный `SubmissionValidator` обязан независимо проверить сохранённую опубликованную schema и значения. Точный production allowlist остаётся `TODO(SURVEY-EXPRESSIONS)`.
+
 ## 5. CSRF, CORS и транспорт
 
 При sessionToken в JSON и без cookie классический CSRF ограничен, но accessKey остается публичным. Naumen должен иметь точный allowlist Origin и не использовать wildcard с credentials. Только HTTPS. Не включать секреты в redirect, referrer и сообщения ошибок.
