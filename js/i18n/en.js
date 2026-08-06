@@ -88,5 +88,27 @@ export const en = Object.freeze({
     serverValidationError: 'The server rejected the form values. Check the entered data.',
     submitError: 'Could not create the request.', attachments: 'Attachments', chooseFiles: 'Choose files',
     attachmentsUnavailable: 'The Naumen file adapter has not been confirmed. Attachments are temporarily unavailable.'
+  },
+  requests: {
+    apply: 'Apply', moreFilters: 'More filters', empty: 'No requests match the selected filters.',
+    loadError: 'Could not load the request list.',
+    filters: {
+      search: 'Search', number: 'Number', status: 'Status', any: 'Any value', title: 'Title',
+      service: 'Service', author: 'Author', requestedFor: 'Requested for', group: 'Work group',
+      assignee: 'Assignee', createdFrom: 'Created from', createdTo: 'Created to',
+      slaBreached: 'SLA breach', reactionFrom: 'Reaction from', reactionTo: 'Reaction to',
+      resolutionFrom: 'Resolution from', resolutionTo: 'Resolution to'
+    },
+    filterValue: { true: 'Breached', false: 'Not breached' },
+    columns: {
+      number: 'Number', title: 'Title', service: 'Service', author: 'Author', status: 'Status',
+      group: 'Work group', assignee: 'Assignee', reaction: 'Reaction deadline',
+      resolution: 'Resolution deadline', sla: 'SLA', createdAt: 'Created'
+    },
+    status: {
+      NEW: 'New', REGISTERED: 'Registered', IN_PROGRESS: 'In progress', WAITING_USER: 'Waiting for user',
+      RESOLVED: 'Resolved', CLOSED: 'Closed', CANCELLED: 'Cancelled', UNKNOWN: 'Unknown'
+    },
+    sla: { paused: 'Paused', breached: 'Breached', onTime: 'On time' }
   }
 });
