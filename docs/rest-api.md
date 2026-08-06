@@ -229,7 +229,7 @@ formsGet принимает formId. formsGetVersions принимает formId, 
 
 | Функция | Запрос | data |
 |---|---|---|
-| requestsGetList | page/pageSize/filters/sort/scope? | PageResult<RequestSummary> |
+| requestsGetList | page/pageSize/filters/sort | PageResult<RequestSummary> |
 | requestsCreate | serviceId, formId, formVersionId, fieldValues, attachmentIds? | request |
 | requestsGet | entityId | request, service, formVersion |
 | requestsChangeStatus | entityId, newStatus, comment?, expectedVersion | request |
@@ -258,9 +258,38 @@ requestsCreate использует requestId как idempotency key. Серве
 
 На этапе 10 `attachmentIds` обязан быть пустым. Непустой список возвращает `VALIDATION_ERROR`, пока `TODO(NAUMEN-FILES)` не закрыт.
 
-requestsGetList применяет объектный scope на сервере. Клиентский scope — подсказка и не расширяет доступ.
+Контракт списка этапа 11:
 
-TODO(REQUEST-VISIBILITY), TODO(NAUMEN-STORAGE), TODO(IDEMPOTENCY).
+    requestsGetList {
+      "page":1,
+      "pageSize":20,
+      "filters":{
+        "search":"printer", "number":"REQ-", "title":"...",
+        "statuses":["IN_PROGRESS"], "service":"...", "author":"...",
+        "requestedFor":"...", "responsibleGroup":"...", "assignee":"...",
+        "createdFrom":"2026-08-01T00:00:00.000Z", "createdTo":null,
+        "slaBreached":true,
+        "reactionDeadlineFrom":null, "reactionDeadlineTo":null,
+        "resolutionDeadlineFrom":null, "resolutionDeadlineTo":null
+      },
+      "sort":[{"field":"createdAt","direction":"desc"}]
+    }
+
+Допустимые поля сортировки: `number`, `title`, `serviceTitle`, `authorTitle`, `status`,
+`responsibleGroupTitle`, `assigneeTitle`, `reactionDeadline`, `resolutionDeadline`, `createdAt`.
+`pageSize` ограничен 100. Ответ содержит `items`, `page`, `pageSize`, `total`, `totalPages`;
+`RequestSummary` содержит как минимум `id`, `number`, `title`, `serviceTitle`, `authorTitle`,
+`status`, `responsibleGroupTitle`, `assigneeTitle`, `createdAt` и объект `sla` с дедлайнами и
+признаками паузы/нарушения.
+
+Клиент не передаёт scope. `requestsGetList` строит его только из доверенной сессии и ролей:
+USER получает доступные ему объекты, OPERATOR — назначенные лично, через группу или серверную
+политику, SYSTEM_ADMIN — все. `RequestRepository.findVisiblePage` обязан применять ACL, фильтры,
+сортировку, `COUNT` и `LIMIT/OFFSET` на сервере; загрузка полного набора для последующей пагинации запрещена.
+
+`DirectoryAdapter.getRequestAccessContext` и `RequestRepository.findVisiblePage` — проектные
+адаптеры, а не встроенные API Naumen. Их привязка остаётся TODO(REQUEST-VISIBILITY) и
+TODO(NAUMEN-STORAGE); создание также сохраняет TODO(IDEMPOTENCY).
 
 ### SLA и календари
 
