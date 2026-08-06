@@ -45,7 +45,21 @@ class SlaFunctions {
     private Map read(String name, Map body, Closure action) { execute(name, body, false, action) }
     private Map write(String name, Map body, Closure action) { execute(name, body, true, action) }
     private Map execute(String name, Map body, boolean mutation, Closure action) { String id=CommonFunctions.requestId(body); try { Map access=authorize(body,id); if(access.errorResponse)return access.errorResponse; action(access,id) } catch(IllegalArgumentException e){ CommonFunctions.errorResponse('VALIDATION_ERROR',e.message,[:],[],id) } catch(Exception e){ if(e.message=='VERSION_CONFLICT') return CommonFunctions.errorResponse('VERSION_CONFLICT','Объект изменён',[:],[],id); logger?.error("${name} failed requestId=${id}",e); CommonFunctions.errorResponse('INTERNAL_ERROR','Внутренняя ошибка',[:],[],id) } }
-    private Map authorize(Map body,String id){ Map session=sessionRepository.findActive(body.sessionToken?.toString()); if(!session)return [errorResponse:CommonFunctions.errorResponse('INVALID_SESSION','Сессия недействительна',[:],[],id)]; Map current=session.user as Map; if(!permissionAdapter.hasAnyRole(current,['SLA_ADMIN','SYSTEM_ADMIN']))return [errorResponse:CommonFunctions.errorResponse('FORBIDDEN','Недостаточно прав',[:],[],id)]; [currentUser:current] }
+    private Map authorize(Map body, String id) {
+        String token = body?.sessionToken?.toString()
+        Map session = token ? sessionRepository.findActiveByToken(token) : null
+        if (!session) return [errorResponse: CommonFunctions.errorResponse('INVALID_SESSION', 'Сессия недействительна', [:], [], id)]
+        if (session.expiresAt && session.expiresAt <= new Date()) {
+            sessionRepository.revoke(session.id)
+            return [errorResponse: CommonFunctions.errorResponse('SESSION_EXPIRED', 'Сессия истекла', [:], [], id)]
+        }
+        List<String> roles = permissionAdapter?.rolesForUser(session.userId)
+        if (!(roles instanceof List)) throw new IllegalStateException('PermissionAdapter returned invalid roles')
+        if (!roles.intersect(['SLA_ADMIN', 'SYSTEM_ADMIN']).size()) {
+            return [errorResponse: CommonFunctions.errorResponse('FORBIDDEN', 'Недостаточно прав', [:], [], id)]
+        }
+        return [currentUser: [id: session.userId, roles: roles]]
+    }
     private static Map normalizeRule(def raw){ if(!(raw instanceof Map))throw new IllegalArgumentException('rule должен быть объектом'); Map out=normalizeChanges(raw); ['title','conditions','reactionTimeMinutes','resolutionTimeMinutes','calendarId'].each{if(!out.containsKey(it))throw new IllegalArgumentException("${it} обязателен")}; out }
     private static Map normalizeChanges(def raw){ if(!(raw instanceof Map))throw new IllegalArgumentException('changes должен быть объектом'); Set allowed=['title','serviceId','enabled','order','conditions','reactionTimeMinutes','resolutionTimeMinutes','calendarId','pausedStatuses'] as Set; if(raw.keySet().any{!allowed.contains(it)})throw new IllegalArgumentException('Недопустимое поле'); Map out=[:]; raw.each{k,v-> if(k=='title')out[k]=text(v,200); else if(k in ['serviceId'])out[k]=optionalId(v); else if(k=='enabled'){if(!(v instanceof Boolean))throw new IllegalArgumentException('enabled должен быть boolean');out[k]=v} else if(k in ['order','reactionTimeMinutes','resolutionTimeMinutes'])out[k]=positive(v,null); else if(k=='calendarId')out[k]=requiredId(v); else if(k=='pausedStatuses'){out[k]=idList(v,k);if(out[k].any{!STATUSES.contains(it)})throw new IllegalArgumentException('Недопустимый статус')} else if(k=='conditions')out[k]=normalizeConditions(v)}; if(!out)throw new IllegalArgumentException('Нет изменений'); out }
     private static List normalizeConditions(def raw){ if(!(raw instanceof List)||!raw||raw.size()>20)throw new IllegalArgumentException('conditions должен содержать 1..20 элементов'); raw.collect{c->if(!(c instanceof Map)||!OPERATORS.contains(c.operator)||c.operator!='ANY'&&!FIELDS.contains(c.field))throw new IllegalArgumentException('Недопустимое условие'); [field:c.operator=='ANY'?null:c.field,operator:c.operator,value:c.operator in ['ANY','EMPTY','NOT_EMPTY']?null:c.value]} }
