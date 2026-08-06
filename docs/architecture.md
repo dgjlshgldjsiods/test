@@ -1,6 +1,6 @@
 # Архитектура прототипа ITSM
 
-Статус: актуализировано по итогам этапа 16 (файловая интеграция заблокирована до проверки установки).
+Статус: финальная редакция этапа 17 (файловая интеграция заблокирована до проверки установки).
 Источник требований: docs/requirements.md.
 Реализованы базовый frontend, транспорт, авторизация, локализация, формы, каталоги, заявки, карточка пользователя и редактор SLA. Файловый механизм не реализован.
 
@@ -312,7 +312,11 @@ requestsGetList -> RequestRepository`. Контроллер отправляет
 
 matchSlaRules фильтрует enabled, стабильно сортирует по order, вычисляет совпадения по allowlist операторов ANY, EQ, NE, IN, NOT_IN, EMPTY, NOT_EMPTY и RANGE, выбирает первое и возвращает matchedRuleIds и conflictRuleIds. findPotentialSlaConflicts выполняет лишь консервативную UX-проверку и всегда маркирует предупреждения approximate. Серверная slaTestRules независимо повторяет сопоставление и остаётся источником истины. Отсутствие правила возвращает SLA_NOT_FOUND либо утвержденное правило по умолчанию (TODO). Только сервер вызывает CalendarAdapter для рабочих дедлайнов, праздников и часовых поясов. Создание заявки и смена статуса атомарно добавляют событие пересчета; несколько совпадений дополнительно создают SLA_RULE_CONFLICT. Пауза и возобновление используют серверное время и календарь.
 
-## 8. Итоговое дерево проекта
+## 8. Архитектурное дерево
+
+Дерево ниже показывает целевую декомпозицию и использует сокращения. Оно включает некоторые
+зарезервированные границы (`TransportClient`, `FilesApi`, `FileUploader`, service/adapters), которых
+нет как отдельных рабочих файлов. Фактический список файлов зафиксирован в `docs/final-audit.md`.
 
     /
     ├── login.html
@@ -414,10 +418,10 @@ matchSlaRules фильтрует enabled, стабильно сортирует 
 
 - auth: authLogin, authLogout, authRefresh, authGetCurrentUser.
 - catalog: catalogGetTree, catalogGetAvailableTree, catalogGetFolder, catalogCreateFolder, catalogUpdateFolder, catalogDeleteFolder, catalogGetServices, catalogGetService, catalogCreateService, catalogUpdateService, catalogMoveService, catalogChangeServiceStatus, catalogGetServiceAvailability, catalogUpdateServiceAvailability.
-- forms: formsGetList, formsGet, formsCreate, formsUpdate, formsGetVersions, formsGetVersion, formsCreateVersion, formsCloneVersion, formsSaveDraft, formsPublishVersion.
-- requests: requestsGetList, requestsCreate, requestsGet, requestsChangeStatus, requestsChangeAssignment, requestsAddComment, requestsGetComments, requestsGetHistory, requestsGetAttachments, requestsAddAttachment, requestsGetSla, requestsRecalculateSla.
+- forms: formsGetList, formsGet, formsCreate, formsGetVersions, formsGetVersion, formsCreateVersion, formsCloneVersion, formsSaveDraft, formsPublishVersion.
+- requests: requestsGetList, requestsCreate, requestsGet, requestsChangeStatus, requestsChangeAssignment, requestsAddComment, requestsGetComments, requestsGetHistory, requestsGetAttachments, requestsGetSla.
 - SLA/calendar: slaGetRules, slaGetRule, slaCreateRule, slaUpdateRule, slaDeleteRule, slaReorderRules, slaTestRules, slaCheckConflicts, slaCalculateForRequest, calendarsGetList, calendarsGet, calendarsCalculateDeadline.
-- users/directories: usersGetList, usersGet, usersUpdate, usersGetCreatedRequests, usersGetAssignedRequests, usersGetGroupRequests, dictionariesGetGroups, dictionariesGetOrganizations, dictionariesGetDepartments, dictionariesGetItems, dictionariesSearchUsers.
+- users/directories: usersGet, usersUpdate, usersGetCreatedRequests, usersGetAssignedRequests, usersGetGroupRequests, dictionariesGetGroups, dictionariesGetOrganizations, dictionariesGetDepartments, dictionariesGetItems, dictionariesSearchUsers.
 - files: зарезервированы filesUpload, filesGet, filesDelete. Сейчас entry-функции fail closed с `FILES_INTEGRATION_UNAVAILABLE`; это не рабочий API. `FileAdapter` остаётся проектным портом до подтверждения текущей установки — см. `docs/naumen-files.md` и TODO(NAUMEN-FILES).
 
 ## 10. План вертикальной реализации
