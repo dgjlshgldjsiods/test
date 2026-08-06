@@ -134,5 +134,18 @@ export const en = Object.freeze({
     remainingReaction: 'Reaction time left', remainingResolution: 'Resolution time left', minutes: '{count} min',
     attachments: 'Attachments', noAttachments: 'No attachments.',
     attachmentReadOnly: 'Adding attachments will be implemented after the Naumen file adapter is confirmed.'
+  },
+  profile: {
+    missingUser: 'Could not determine the user.', loadError: 'Could not load the profile.',
+    login: 'Login', fullName: 'Full name', email: 'Email', phone: 'Phone',
+    organizations: 'Organizations', department: 'Department', groups: 'Work groups', roles: 'Roles',
+    language: 'Language', timezone: 'Time zone', active: 'Active', preferences: 'Profile preferences',
+    adminEdit: 'Edit user', createdRequests: 'My requests', assignedRequests: 'Assigned directly to me',
+    groupRequests: 'Assigned to my groups', noRequests: 'No requests.', requestsLoadError: 'Could not load requests.',
+    saveError: 'Could not save the profile.', versionConflict: 'Another administrator has changed the profile. Reload the page.',
+    roleNames: {
+      USER: 'User', OPERATOR: 'Operator', CATALOG_ADMIN: 'Catalog administrator',
+      FORM_ADMIN: 'Forms administrator', SLA_ADMIN: 'SLA administrator', SYSTEM_ADMIN: 'System administrator'
+    }
   }
 });
