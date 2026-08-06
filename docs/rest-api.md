@@ -42,7 +42,7 @@ NaumenApiClient автоматически добавляет requestId, languag
       "requestId": "uuid"
     }
 
-Коды: VALIDATION_ERROR, INVALID_CREDENTIALS, INVALID_SESSION, SESSION_EXPIRED, FORBIDDEN, NOT_FOUND, VERSION_CONFLICT, DUPLICATE, DEPENDENCY_EXISTS, SLA_NOT_FOUND, FILE_TOO_LARGE, UNSUPPORTED_FILE_TYPE, INTERNAL_ERROR.
+Коды: VALIDATION_ERROR, INVALID_CREDENTIALS, INVALID_SESSION, SESSION_EXPIRED, FORBIDDEN, NOT_FOUND, VERSION_CONFLICT, DUPLICATE, DEPENDENCY_EXISTS, SLA_NOT_FOUND, FILE_TOO_LARGE, UNSUPPORTED_FILE_TYPE, FILES_INTEGRATION_UNAVAILABLE, INTERNAL_ERROR.
 
 HTTP: 2xx допустим для любого корректно обработанного бизнес-ответа Naumen; если платформа позволяет, рекомендуются 400 для синтаксической ошибки, 401 для сессии, 403, 404, 409, 413 и 500. Клиент всегда ориентируется и на error.code.
 
@@ -323,6 +323,18 @@ USER читает только доступную заявку и публичн
 мутации, страницы комментариев/истории и SLA snapshot — проектные адаптеры, не встроенные API
 Naumen. Их сопоставление с ACL, объектами, историей и календарями остаётся
 `TODO(REQUEST-VISIBILITY)`, `TODO(NAUMEN-STORAGE)` и `TODO(NAUMEN-CALENDAR)`.
+
+### Файлы — неподтверждённый контракт
+
+`filesUpload`, `filesGet` и `filesDelete` зарезервированы архитектурой, но не объявляются рабочими
+REST-функциями. Доступная конфигурация не содержит адреса текущей установки, а файловые upload,
+download и delete API не подтверждены. `FileFunctions` возвращает
+`FILES_INTEGRATION_UNAVAILABLE` и не вызывает предполагаемые внутренние методы Naumen.
+
+До выполнения чек-листа из `docs/naumen-files.md` запрещено добавлять Base64/multipart payload,
+download URL или идентификаторы временных файлов в этот контракт. `requestsGetAttachments`
+по-прежнему возвращает только безопасные метаданные, если их способен предоставить настроенный
+`RequestRepository`; наличие метаданных не означает доступность скачивания.
 
 ### SLA и календари
 
