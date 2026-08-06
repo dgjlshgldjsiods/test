@@ -1,1 +1,3 @@
-/* Стили страницы requests будут добавлены в соответствующем вертикальном этапе. */
+.service-survey-host { overflow: hidden; }
+.service-survey-host .sd-root-modern { background: transparent; }
+.service-form-page { max-width: 72rem; margin-inline: auto; }
