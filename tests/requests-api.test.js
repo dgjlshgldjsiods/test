@@ -48,4 +48,18 @@ QUnit.module('RequestsApi', () => {
       { name: 'requestsGetSla', body: { entityId: 'request$1' } }
     ]);
   });
+
+  QUnit.test('profile request lists use separate server-paginated functions', async (assert) => {
+    const calls = [];
+    const api = new RequestsApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({ items: [] }); } });
+    const page = { page: 2, pageSize: 10, filters: {}, sort: [{ field: 'createdAt', direction: 'desc' }] };
+    await api.getUserCreated('user$1', page);
+    await api.getUserAssigned('user$1', page);
+    await api.getUserGroup('user$1', page);
+    assert.deepEqual(calls, [
+      { name: 'usersGetCreatedRequests', body: { ...page, userId: 'user$1' } },
+      { name: 'usersGetAssignedRequests', body: { ...page, userId: 'user$1' } },
+      { name: 'usersGetGroupRequests', body: { ...page, userId: 'user$1' } }
+    ]);
+  });
 });
