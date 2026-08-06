@@ -55,7 +55,7 @@ CATALOG_ADMIN, FORM_ADMIN и SLA_ADMIN не получают права опер
 | service-catalog.html | активная сессия |
 | service-form.html | активная сессия + доступ к serviceId |
 | requests.html | USER, OPERATOR или SYSTEM_ADMIN; набор строк фильтрует сервер |
-| request-card.html | активная сессия + доступ к entityId |
+| request-card.html | USER, OPERATOR или SYSTEM_ADMIN + доступ к entityId |
 | profile.html без id | активная сессия, собственный профиль |
 | profile.html?id=... | SYSTEM_ADMIN либо id текущего пользователя |
 | admin/catalog-editor.html | CATALOG_ADMIN или SYSTEM_ADMIN |
@@ -71,6 +71,7 @@ CATALOG_ADMIN, FORM_ADMIN и SLA_ADMIN не получают права опер
 - forms/form-editor: FORM_ADMIN или SYSTEM_ADMIN;
 - sla-editor: SLA_ADMIN или SYSTEM_ADMIN;
 - requests: USER, OPERATOR или SYSTEM_ADMIN; список дополнительно ограничивается серверным объектным scope;
+- request-card: USER, OPERATOR или SYSTEM_ADMIN; чтение, обработка и INTERNAL дополнительно проверяются по объекту;
 - остальные пользовательские страницы: активная сессия и объектная проверка соответствующей вертикали.
 
 ## 4. Объектные правила
