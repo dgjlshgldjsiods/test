@@ -110,6 +110,17 @@ TODO(NAUMEN-AUTH): AuthenticationAdapter. TODO(NAUMEN-SESSION): SessionRepositor
 | catalogGetServiceAvailability | serviceId | availability |
 | catalogUpdateServiceAvailability | serviceId, availability, expectedVersion | service |
 
+`catalogGetAvailableTree` принимает `{search}` и требует только активную пользовательскую сессию. Сервер получает `userId` из сессии, а подразделение и все организации — через проектный `DirectoryAdapter`; значения из браузера для решения доступности не принимаются. `CatalogRepository.findAvailableTree` возвращает только `PUBLISHED` услуги, удовлетворяющие `ALL` либо хотя бы одному условию `RESTRICTED`, и необходимые для дерева папки-предки. Поиск выполняется в том же серверном scope и не расширяет доступ.
+
+Ответ:
+
+    {
+      "folders": [{"id":"folder$1","title":{"ru":"...","en":"..."},"parentFolderId":null,"sortOrder":0}],
+      "services": [{"id":"service$1","title":{"ru":"...","en":"..."},"shortDescription":{"ru":"...","en":"..."},"icon":"support","folderId":"folder$1","status":"PUBLISHED","sortOrder":0}]
+    }
+
+В ответ пользовательского каталога не включаются внутренние назначения, SLA-настройки или списки audience, если они не нужны интерфейсу. Конкретное построение server-side scope в Naumen остаётся `TODO(NAUMEN-CATALOG)` и `TODO(NAUMEN-DIRECTORY)`.
+
 Сервер проверяет отсутствие потомков перед удалением папки; уникальность code; существование папки; совместимость formId/formVersionId; опубликованность выбранной версии при публикации услуги; принадлежность assignee группе; доступность при чтении и создании заявки.
 
 Пример availability:
