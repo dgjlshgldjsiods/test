@@ -78,5 +78,15 @@ export const en = Object.freeze({
     viewMode: 'View mode', cards: 'Cards', list: 'List', folders: 'Catalog folders',
     allServices: 'All services', breadcrumbs: 'Breadcrumbs', root: 'Catalog',
     empty: 'This folder has no available services.', searchEmpty: 'No services match your search.'
+  },
+  serviceForm: {
+    missingService: 'Service identifier is missing.', unavailable: 'The service was not found or is unavailable.',
+    formNotConfigured: 'No form is configured for this service.', formUnavailable: 'The published form version is unavailable.',
+    unsafeSchema: 'The form schema contains unsupported or unsafe elements.',
+    loadError: 'Could not load the service form.', form: 'Request form', submit: 'Submit request',
+    submitting: 'Submitting…', validationError: 'Complete required fields and correct the errors.',
+    serverValidationError: 'The server rejected the form values. Check the entered data.',
+    submitError: 'Could not create the request.', attachments: 'Attachments', chooseFiles: 'Choose files',
+    attachmentsUnavailable: 'The Naumen file adapter has not been confirmed. Attachments are temporarily unavailable.'
   }
 });
