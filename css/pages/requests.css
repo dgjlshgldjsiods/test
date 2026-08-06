@@ -1,3 +1,7 @@
 .service-survey-host { overflow: hidden; }
 .service-survey-host .sd-root-modern { background: transparent; }
 .service-form-page { max-width: 72rem; margin-inline: auto; }
+.requests-table .table { min-width: 112rem; }
+.requests-table th { white-space: nowrap; }
+.requests-table td { vertical-align: middle; }
+.requests-list-page .form-label { margin-bottom: .25rem; }
