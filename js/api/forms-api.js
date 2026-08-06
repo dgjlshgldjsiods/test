@@ -27,6 +27,10 @@ export class FormsApi {
     return this.apiClient.exec('formsGetVersion', { formVersionId, serviceId });
   }
 
+  getRequestVersion(formVersionId, requestEntityId) {
+    return this.apiClient.exec('formsGetVersion', { formVersionId, requestEntityId });
+  }
+
   createVersion(formId, { sourceVersionId = null, schema = null, expectedFormVersion } = {}) {
     return this.apiClient.exec('formsCreateVersion', {
       formId, sourceVersionId, schema, expectedFormVersion
