@@ -9,6 +9,12 @@ QUnit.module('Catalog and dictionary API', () => {
     assert.deepEqual(calls, [{ name: 'catalogGetAvailableTree', body: { search: 'printer' } }]);
   });
 
+  QUnit.test('available service is selected only from the server-filtered tree', async (assert) => {
+    const api = new CatalogApi({ exec() { return Promise.resolve({ services: [{ id: 'service$1' }] }); } });
+    assert.deepEqual(await api.getAvailableService('service$1'), { id: 'service$1' });
+    assert.strictEqual(await api.getAvailableService('hidden'), null);
+  });
+
   QUnit.test('catalog commands preserve optimistic locking contracts', async (assert) => {
     const calls = [];
     const api = new CatalogApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({ version: 2 }); } });
