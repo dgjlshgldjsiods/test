@@ -2,6 +2,13 @@ import { CatalogApi } from '../js/api/catalog-api.js';
 import { DictionariesApi } from '../js/api/dictionaries-api.js';
 
 QUnit.module('Catalog and dictionary API', () => {
+  QUnit.test('user catalog calls only catalogGetAvailableTree', async (assert) => {
+    const calls = [];
+    const api = new CatalogApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({ folders: [], services: [] }); } });
+    await api.getAvailableTree('printer');
+    assert.deepEqual(calls, [{ name: 'catalogGetAvailableTree', body: { search: 'printer' } }]);
+  });
+
   QUnit.test('catalog commands preserve optimistic locking contracts', async (assert) => {
     const calls = [];
     const api = new CatalogApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({ version: 2 }); } });
