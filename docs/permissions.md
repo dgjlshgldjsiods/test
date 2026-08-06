@@ -56,7 +56,7 @@ CATALOG_ADMIN, FORM_ADMIN и SLA_ADMIN не получают права опер
 | service-form.html | активная сессия + доступ к serviceId |
 | requests.html | USER, OPERATOR или SYSTEM_ADMIN; набор строк фильтрует сервер |
 | request-card.html | USER, OPERATOR или SYSTEM_ADMIN + доступ к entityId |
-| profile.html без id | активная сессия, собственный профиль |
+| profile.html без id | активная сессия, собственный профиль; self-update только language/timezone |
 | profile.html?id=... | SYSTEM_ADMIN либо id текущего пользователя |
 | admin/catalog-editor.html | CATALOG_ADMIN или SYSTEM_ADMIN |
 | admin/forms.html | FORM_ADMIN или SYSTEM_ADMIN |
@@ -94,7 +94,7 @@ TODO(REQUEST-VISIBILITY): подтвердить точные дополните
 
 ### Профиль
 
-Обычный пользователь читает свой профиль и меняет только явно разрешенные предпочтения (например language, timezone, theme при разрешении). SYSTEM_ADMIN может открыть чужой профиль; список изменяемых защищенных полей требует TODO(PROFILE-EDIT). Роли, организации и группы никогда не принимаются от обычного пользователя.
+Обычный пользователь читает свой профиль и меняет только `language` и `timezone`. SYSTEM_ADMIN может открыть и редактировать чужой профиль: основные данные, active, роли, организации, подразделение и группы. `id` и `login` не меняются этим контрактом. Роли, организации, подразделение и группы никогда не принимаются от обычного пользователя.
 
 ### Формы и SLA
 
