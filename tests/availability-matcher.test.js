@@ -1,4 +1,4 @@
-import { hasRestrictedAudience, isServiceAvailable, normalizeAvailability } from '../js/core/availability-matcher.js';
+import { filterAvailableServices, hasRestrictedAudience, isServiceAvailable, normalizeAvailability } from '../js/core/availability-matcher.js';
 
 QUnit.module('Service availability', () => {
   const user = { id: 'user$1', departmentId: 'department$1', organizationIds: ['organization$1', 'organization$2'] };
@@ -27,5 +27,16 @@ QUnit.module('Service availability', () => {
     assert.deepEqual(normalizeAvailability({ mode: 'RESTRICTED', organizationIds: ['org$1', '', 'org$1'] }), {
       mode: 'RESTRICTED', userIds: [], departmentIds: [], organizationIds: ['org$1']
     });
+  });
+
+  QUnit.test('предварительный фильтр только сужает список до PUBLISHED и доступных услуг', (assert) => {
+    const services = [
+      { id: 'all', status: 'PUBLISHED', availability: { mode: 'ALL' } },
+      { id: 'mine', status: 'PUBLISHED', availability: { mode: 'RESTRICTED', userIds: ['user$1'] } },
+      { id: 'hidden', status: 'PUBLISHED', availability: { mode: 'RESTRICTED', userIds: ['other'] } },
+      { id: 'draft', status: 'DRAFT', availability: { mode: 'ALL' } }
+    ];
+    assert.deepEqual(filterAvailableServices(services, user).map((service) => service.id), ['all', 'mine']);
+    assert.deepEqual(filterAvailableServices(null, user), []);
   });
 });
