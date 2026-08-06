@@ -135,6 +135,18 @@ export const en = Object.freeze({
     attachments: 'Attachments', noAttachments: 'No attachments.',
     attachmentReadOnly: 'Adding attachments will be implemented after the Naumen file adapter is confirmed.'
   },
+  slaEditor: {
+    serviceId: 'Service identifier (optional)', create: 'Create rule', edit: 'Edit rule',
+    title: 'Title', order: 'Order', times: 'Reaction / resolution', enabled: 'Enabled', actions: 'Actions',
+    enable: 'Enable', disable: 'Disable', delete: 'Delete', deleteConfirm: 'Delete the SLA rule?',
+    reaction: 'Reaction, working minutes', resolution: 'Resolution, working minutes', calendar: 'Working calendar',
+    conditions: 'Conditions', addCondition: 'Add condition', paused: 'Paused statuses',
+    test: 'Context test', runTest: 'Test on server', checkConflicts: 'Check overlaps',
+    serverResult: 'Server result', preview: 'Browser preview',
+    approximateWarning: 'Warning: overlap detection is approximate', noWarnings: 'No potential conflicts found.',
+    empty: 'No SLA rules found.', loadError: 'Could not load SLA rules.', saved: 'SLA changes saved.',
+    commandError: 'The SLA operation failed.', versionConflict: 'Another user changed the rules. Reload the list.'
+  },
   profile: {
     missingUser: 'Could not determine the user.', loadError: 'Could not load the profile.',
     login: 'Login', fullName: 'Full name', email: 'Email', phone: 'Phone',
