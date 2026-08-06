@@ -110,5 +110,29 @@ export const ru = Object.freeze({
       RESOLVED: 'Решена', CLOSED: 'Закрыта', CANCELLED: 'Отменена', UNKNOWN: 'Неизвестно'
     },
     sla: { paused: 'Приостановлен', breached: 'Нарушен', onTime: 'В срок' }
+  },
+  requestCard: {
+    missingId: 'Не указан идентификатор заявки.', loadError: 'Не удалось загрузить карточку заявки.',
+    service: 'Услуга', author: 'Автор', requestedFor: 'Заказчик', createdAt: 'Создана',
+    group: 'Рабочая группа', assignee: 'Ответственный', submittedForm: 'Заполненная форма',
+    changeStatus: 'Изменить статус', statusComment: 'Комментарий к изменению статуса',
+    assignment: 'Назначение', notAssigned: 'Не назначен', assignmentError: 'Не удалось изменить назначение.',
+    assignmentLoadError: 'Не удалось загрузить справочники назначения.', commandError: 'Не удалось выполнить операцию.',
+    versionConflict: 'Заявка уже изменена другим пользователем. Перезагрузите карточку.',
+    comments: 'Комментарии', commentText: 'Текст комментария', commentType: 'Тип комментария',
+    publicComment: 'Публичный', internalComment: 'Внутренний', addComment: 'Добавить комментарий',
+    noComments: 'Комментариев пока нет.', commentError: 'Не удалось добавить комментарий.', commentsLoadError: 'Не удалось загрузить комментарии.',
+    commentTypes: { PUBLIC: 'Публичный', INTERNAL: 'Внутренний' },
+    history: 'История', noHistory: 'История пока пуста.', historyLoadError: 'Не удалось загрузить историю.',
+    events: {
+      CREATED: 'Заявка создана', STATUS_CHANGED: 'Статус изменён', ASSIGNMENT_CHANGED: 'Назначение изменено',
+      FIELDS_CHANGED: 'Поля изменены', COMMENT_ADDED: 'Добавлен комментарий', ATTACHMENT_ADDED: 'Добавлено вложение',
+      SLA_CALCULATED: 'SLA рассчитан', SLA_PAUSED: 'SLA приостановлен', SLA_RESUMED: 'SLA возобновлён',
+      SLA_RULE_CONFLICT: 'Конфликт определения SLA', UNKNOWN: 'Изменение заявки'
+    },
+    sla: 'SLA', reactionDeadline: 'Срок реакции', resolutionDeadline: 'Срок решения',
+    remainingReaction: 'Осталось на реакцию', remainingResolution: 'Осталось на решение', minutes: '{count} мин.',
+    attachments: 'Вложения', noAttachments: 'Вложений нет.',
+    attachmentReadOnly: 'Добавление вложений будет реализовано после подтверждения файлового адаптера Naumen.'
   }
 });
