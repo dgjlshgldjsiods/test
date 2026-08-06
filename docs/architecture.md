@@ -279,6 +279,15 @@ SurveyJS Creator подключён на одной admin-странице ка�
 
 Динамические choices заполняет `SurveyDictionaryLoader` только через `DictionariesApi` и фиксированные проектные `REQUEST_*` коды. После клиентской проверки `requestsCreate` заново загружает услугу и версию и передаёт values проектному `SubmissionValidator`. `RequestRepository` отвечает за idempotency `requestId` и сохранение ссылки на неизменяемую FormVersion. Файловый UI остаётся отключённым до реализации `FileAdapter`.
 
+### Список заявок
+
+Вертикаль этапа 11 имеет границы `requests-page -> RequestsApi -> NaumenApiClient ->
+requestsGetList -> RequestRepository`. Контроллер отправляет только номер текущей страницы,
+размер, нормализованные фильтры и allowlist-сортировку. Сервер заново получает роли и формирует
+неподменяемый visibility context: USER, OPERATOR либо SYSTEM_ADMIN. Проектный
+`RequestRepository.findVisiblePage` должен выполнить ACL, поиск, фильтрацию, сортировку и
+пагинацию одним серверным запросом; внутренние API и модель хранения Naumen остаются TODO.
+
 ### SLA
 
 matchSlaRules фильтрует enabled, сортирует по order, вычисляет совпадения по утвержденному allowlist операторов, выбирает первое и возвращает matchedRuleIds и conflictRuleIds. Отсутствие правила возвращает SLA_NOT_FOUND либо утвержденное правило по умолчанию (TODO). Только сервер вызывает CalendarAdapter для рабочих дедлайнов. Создание заявки и смена статуса атомарно добавляют событие пересчета; несколько совпадений дополнительно создают SLA_RULE_CONFLICT. Пауза и возобновление используют серверное время и календарь.
