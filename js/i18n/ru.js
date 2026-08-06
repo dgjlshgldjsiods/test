@@ -2,7 +2,7 @@ export const ru = Object.freeze({
   common: {
     appName: 'ITSM', prototype: 'Прототип', user: 'Пользователь',
     logout: 'Выйти', cancel: 'Отмена', continue: 'Продолжить', close: 'Закрыть',
-    search: 'Найти', retry: 'Повторить', edit: 'Редактировать', yes: 'Да', no: 'Нет',
+    search: 'Найти', retry: 'Повторить', edit: 'Редактировать', save: 'Сохранить', yes: 'Да', no: 'Нет',
     skipToContent: 'К содержимому', language: 'Язык', theme: 'Тема',
     lightTheme: 'Светлая', darkTheme: 'Тёмная', stageCaption: 'Базовая структура интерфейса'
   },
@@ -56,5 +56,21 @@ export const ru = Object.freeze({
     commandError: 'Не удалось выполнить операцию.', loadError: 'Не удалось загрузить форму.',
     missingFormId: 'Не указан идентификатор формы.', metadataRequired: 'Заполните код и русское название формы.',
     creatorUnavailable: 'SurveyJS Creator не загружен. Проверьте доступ к CDN.'
+  },
+  catalogEditor: {
+    tree: 'Дерево каталога', newRootFolder: 'Новая папка', newSubfolder: 'Создать подпапку',
+    newService: 'Создать услугу', createFolder: 'Создание папки', editFolder: 'Редактирование папки',
+    createService: 'Создание услуги', editService: 'Редактирование услуги', deleteFolder: 'Удалить папку',
+    deleteConfirm: 'Удалить пустую папку?', folderNotEmpty: 'Можно удалить только пустую папку.',
+    empty: 'Каталог пока пуст.', chooseItem: 'Выберите элемент дерева или создайте новый.',
+    loadError: 'Не удалось загрузить дерево каталога.', itemLoadError: 'Не удалось загрузить элемент каталога.',
+    commandError: 'Не удалось сохранить изменения.', versionConflict: 'Объект уже изменён другим пользователем. Перезагрузите дерево.',
+    titleRu: 'Название (RU)', titleEn: 'Название (EN)', shortRu: 'Краткое описание (RU)', shortEn: 'Краткое описание (EN)',
+    descriptionRu: 'Описание (RU)', descriptionEn: 'Описание (EN)', icon: 'Код иконки',
+    code: 'Код', sortOrder: 'Порядок отображения', status: 'Статус', form: 'Форма', formVersion: 'Опубликованная версия формы',
+    group: 'Рабочая группа', assignee: 'Ответственный', sla: 'SLA-политика', availability: 'Доступность',
+    users: 'Пользователи', departments: 'Подразделения', organizations: 'Организации', notSelected: 'Не выбрано',
+    move: 'Переместить услугу', saveBeforeMove: 'Сохраните или отмените текущие изменения перед перемещением.',
+    finishEditing: 'Сначала сохраните или отмените текущие изменения.'
   }
 });
