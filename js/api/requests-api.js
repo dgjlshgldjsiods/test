@@ -25,4 +25,8 @@ export class RequestsApi {
   getHistory(entityId, request = {}) { return this.apiClient.exec('requestsGetHistory', { ...request, entityId }); }
   getAttachments(entityId) { return this.apiClient.exec('requestsGetAttachments', { entityId }); }
   getSla(entityId) { return this.apiClient.exec('requestsGetSla', { entityId }); }
+
+  getUserCreated(userId, request = {}) { return this.apiClient.exec('usersGetCreatedRequests', { ...request, userId }); }
+  getUserAssigned(userId, request = {}) { return this.apiClient.exec('usersGetAssignedRequests', { ...request, userId }); }
+  getUserGroup(userId, request = {}) { return this.apiClient.exec('usersGetGroupRequests', { ...request, userId }); }
 }
