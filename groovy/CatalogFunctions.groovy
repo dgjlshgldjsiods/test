@@ -1,6 +1,6 @@
 /**
- * Административные entry-функции каталога modules.newItsmTest.catalog*.
- * catalogRepository, sessionRepository, permissionAdapter и auditAdapter —
+ * Entry-функции административного и пользовательского каталога modules.newItsmTest.catalog*.
+ * catalogRepository, sessionRepository, permissionAdapter, directoryAdapter и auditAdapter —
  * проектные порты, а не встроенные API Naumen.
  * TODO(NAUMEN-CATALOG): сопоставить папки/услуги с реальными объектами Naumen.
  * TODO(NAUMEN-TXN): подтвердить атомарный optimistic locking и проверки зависимостей.
@@ -10,6 +10,7 @@ class CatalogFunctions {
     def catalogRepository
     def sessionRepository
     def permissionAdapter
+    def directoryAdapter
     def auditAdapter
     def logger
 
@@ -20,6 +21,34 @@ class CatalogFunctions {
                 includeDrafts: requestContent?.includeDrafts != false
             ])
             success([folders: result?.folders ?: [], services: result?.services ?: []], requestId)
+        }
+    }
+
+    Map catalogGetAvailableTree(Map requestContent, def user) {
+        String requestId = CommonFunctions.requestId(requestContent)
+        try {
+            Map access = requireAuthenticated(requestContent, requestId)
+            if (access.errorResponse) return access.errorResponse
+            String search = requestContent?.search?.toString()?.trim() ?: ''
+            if (search.size() > 200) throw new IllegalArgumentException('Строка поиска слишком длинная')
+            String language = requestContent?.language?.toString() == 'en' ? 'en' : 'ru'
+
+            // Project DirectoryAdapter loads trusted organization/department data.
+            // Project CatalogRepository performs PUBLISHED + availability filtering
+            // server-side; the browser matcher is never an authorization boundary.
+            Map userContext = directoryAdapter.getCatalogAccessContext(access.currentUser.id)
+            if (!(userContext instanceof Map)) throw new IllegalStateException('DirectoryAdapter returned invalid context')
+            userContext.id = access.currentUser.id
+            Map result = catalogRepository.findAvailableTree(userContext, search, language)
+            List services = result?.services instanceof List
+                ? result.services.findAll { it instanceof Map && it.status == 'PUBLISHED' }
+                : []
+            return success([folders: result?.folders instanceof List ? result.folders : [], services: services], requestId)
+        } catch (IllegalArgumentException exception) {
+            return CommonFunctions.errorResponse('VALIDATION_ERROR', exception.message, [:], [], requestId)
+        } catch (Exception exception) {
+            logger?.error("catalogGetAvailableTree failed, requestId=${requestId}, errorType=${exception.class.name}")
+            return CommonFunctions.errorResponse('INTERNAL_ERROR', 'Внутренняя ошибка сервера', [:], [], requestId)
         }
     }
 
@@ -154,6 +183,17 @@ class CatalogFunctions {
         List roles = permissionAdapter.rolesForUser(session.userId) ?: []
         if (!roles.contains('CATALOG_ADMIN') && !roles.contains('SYSTEM_ADMIN')) return [errorResponse: CommonFunctions.errorResponse('FORBIDDEN', 'Недостаточно прав', [:], [], requestId)]
         return [currentUser: [id: session.userId, roles: roles]]
+    }
+
+    private Map requireAuthenticated(Map requestContent, String requestId) {
+        String token = requestContent?.sessionToken?.toString()
+        Map session = token ? sessionRepository.findActiveByToken(token) : null
+        if (!session) return [errorResponse: CommonFunctions.errorResponse('INVALID_SESSION', 'Сессия недействительна', [:], [], requestId)]
+        if (session.expiresAt && session.expiresAt <= new Date()) {
+            sessionRepository.revoke(session.id)
+            return [errorResponse: CommonFunctions.errorResponse('SESSION_EXPIRED', 'Сессия истекла', [:], [], requestId)]
+        }
+        return [currentUser: [id: session.userId]]
     }
 
     private static Map normalizeFolder(def value) {
