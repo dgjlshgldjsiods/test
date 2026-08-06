@@ -5,7 +5,10 @@
  * групп, подразделений, организаций и SLA-политик.
  */
 class DictionaryFunctions {
-    static final Set DICTIONARY_CODES = ['SLA_POLICIES'] as Set
+    static final Set ADMIN_DICTIONARY_CODES = ['SLA_POLICIES'] as Set
+    static final Set REQUEST_DICTIONARY_CODES = [
+        'REQUEST_USERS', 'REQUEST_GROUPS', 'REQUEST_DEPARTMENTS', 'REQUEST_ORGANIZATIONS'
+    ] as Set
     def directoryAdapter
     def sessionRepository
     def permissionAdapter
@@ -21,17 +24,24 @@ class DictionaryFunctions {
     }
     Map dictionariesGetItems(Map requestContent, def user) {
         String code = requestContent?.dictionaryCode?.toString()
-        if (!DICTIONARY_CODES.contains(code)) return CommonFunctions.errorResponse('VALIDATION_ERROR', 'Недопустимый dictionaryCode', [:], [], CommonFunctions.requestId(requestContent))
-        return list('dictionariesGetItems', requestContent) { access, search, page, size -> directoryAdapter.findDictionaryItems(code, access, search, page, size) }
+        if (!ADMIN_DICTIONARY_CODES.contains(code) && !REQUEST_DICTIONARY_CODES.contains(code)) {
+            return CommonFunctions.errorResponse('VALIDATION_ERROR', 'Недопустимый dictionaryCode', [:], [], CommonFunctions.requestId(requestContent))
+        }
+        boolean adminOnly = ADMIN_DICTIONARY_CODES.contains(code)
+        return list('dictionariesGetItems', requestContent, adminOnly) { access, search, page, size ->
+            adminOnly
+                ? directoryAdapter.findDictionaryItems(code, access, search, page, size)
+                : directoryAdapter.findRequestDictionaryItems(code, access, search, page, size)
+        }
     }
 
-    private Map list(String operation, Map requestContent, Closure finder) {
+    private Map list(String operation, Map requestContent, boolean adminOnly = true, Closure finder) {
         String requestId = CommonFunctions.requestId(requestContent)
         try {
             Map currentUser = requireAdmin(requestContent)
             if (!currentUser) return CommonFunctions.errorResponse('INVALID_SESSION', 'Сессия недействительна', [:], [], requestId)
             if (currentUser.sessionExpired) return CommonFunctions.errorResponse('SESSION_EXPIRED', 'Сессия истекла', [:], [], requestId)
-            if (!currentUser.allowed) return CommonFunctions.errorResponse('FORBIDDEN', 'Недостаточно прав', [:], [], requestId)
+            if (adminOnly && !currentUser.allowed) return CommonFunctions.errorResponse('FORBIDDEN', 'Недостаточно прав', [:], [], requestId)
             String search = requestContent?.search?.toString()?.trim() ?: ''
             if (search.size() > 200) throw new IllegalArgumentException('Строка поиска слишком длинная')
             int page = requestContent?.page instanceof Number ? Math.max(1, requestContent.page.intValue()) : 1
