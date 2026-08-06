@@ -1,4 +1,4 @@
-import { FormsApi } from '../js/api/forms-api.js';
+import { FormsApi } from '../js/api/forms-api.js?stage=10b';
 import { DataTable } from '../js/components/data-table.js';
 import { Pagination } from '../js/components/pagination.js';
 
@@ -26,6 +26,13 @@ QUnit.module('FormsApi', () => {
       { name: 'formsGet', body: { formId: 'form$1' } },
       { name: 'formsGetVersions', body: { page: 3, pageSize: 10, formId: 'form$1' } }
     ]);
+  });
+
+  QUnit.test('пользовательское чтение версии связано с доступной услугой', async (assert) => {
+    const calls = [];
+    const api = new FormsApi({ exec(name, body) { calls.push({ name, body }); return Promise.resolve({}); } });
+    await api.getPublishedVersion('version$1', 'service$1');
+    assert.deepEqual(calls, [{ name: 'formsGetVersion', body: { formVersionId: 'version$1', serviceId: 'service$1' } }]);
   });
 
   QUnit.test('команды редактора передают expectedVersion и schema только в тело', async (assert) => {
