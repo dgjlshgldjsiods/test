@@ -9,6 +9,7 @@
  * политиками и рабочими группами конкретной инсталляции Naumen.
  */
 class RequestFunctions {
+    static final Set<String> REQUEST_STATUSES = ['NEW', 'REGISTERED', 'IN_PROGRESS', 'WAITING_USER', 'RESOLVED', 'CLOSED', 'CANCELLED'] as Set
     def requestRepository
     def catalogRepository
     def formRepository
@@ -18,6 +19,96 @@ class RequestFunctions {
     def sessionRepository
     def auditAdapter
     def logger
+
+    Map requestsGet(Map requestContent, def user) {
+        return readRequestOperation('requestsGet', requestContent) { Map currentUser, Map visibility, String entityId, String requestId ->
+            Map details = requestRepository.findVisibleDetails(entityId, currentUser, visibility, requestContent?.language?.toString())
+            if (!details) return requestNotFound(requestId)
+            if (!(details.request instanceof Map)) throw new IllegalStateException('RequestRepository returned invalid details')
+            return CommonFunctions.successResponse(details, requestId)
+        }
+    }
+
+    Map requestsChangeStatus(Map requestContent, def user) {
+        return processRequestOperation('requestsChangeStatus', requestContent) { Map currentUser, Map request, String entityId, String requestId ->
+            String status = requiredId(requestContent?.newStatus, 'newStatus')
+            if (!REQUEST_STATUSES.contains(status)) throw new IllegalArgumentException('Недопустимый статус заявки')
+            String comment = limitedText(requestContent?.comment, 1000, false)
+            long expected = requiredVersion(requestContent?.expectedVersion)
+            Map result = requestRepository.changeStatusAtomic(request, status, comment, expected, currentUser, requestId)
+            return mutationResponse(result, requestId, 'Не удалось изменить статус')
+        }
+    }
+
+    Map requestsChangeAssignment(Map requestContent, def user) {
+        return processRequestOperation('requestsChangeAssignment', requestContent) { Map currentUser, Map request, String entityId, String requestId ->
+            String groupId = requiredId(requestContent?.responsibleGroupId, 'responsibleGroupId')
+            String assigneeId = optionalId(requestContent?.assigneeId)
+            long expected = requiredVersion(requestContent?.expectedVersion)
+            // Repository validates that group/user exist, are active and that
+            // the assignee may be assigned to the selected group.
+            Map result = requestRepository.changeAssignmentAtomic(request, groupId, assigneeId, expected, currentUser, requestId)
+            return mutationResponse(result, requestId, 'Не удалось изменить ответственного')
+        }
+    }
+
+    Map requestsAddComment(Map requestContent, def user) {
+        String requestId = CommonFunctions.requestId(requestContent)
+        try {
+            Map currentUser = requireRequestUser(requestContent, requestId)
+            if (currentUser.errorResponse) return currentUser.errorResponse
+            String entityId = requiredId(requestContent?.entityId, 'entityId')
+            Map visibility = buildVisibility(currentUser, currentUser.roles as Set<String>)
+            Map request = requestRepository.findVisibleById(entityId, currentUser, visibility)
+            if (!request) return requestNotFound(requestId)
+            if (!(requestContent?.comment instanceof Map)) throw new IllegalArgumentException('comment должен быть JSON-объектом')
+            String type = requestContent.comment.type?.toString()
+            if (!(type in ['PUBLIC', 'INTERNAL'])) throw new IllegalArgumentException('Недопустимый тип комментария')
+            boolean canProcess = canProcess(currentUser)
+            if (type == 'INTERNAL' && !canProcess) return forbidden(requestId)
+            if (type == 'INTERNAL' && !requestRepository.canProcess(request, currentUser, visibility)) return forbidden(requestId)
+            String text = limitedText(requestContent.comment.text, 4000, true)
+            long expected = requiredVersion(requestContent?.expectedVersion)
+            Map result = requestRepository.addCommentAtomic(request, type, text, expected, currentUser, requestId)
+            return mutationResponse(result, requestId, 'Не удалось добавить комментарий')
+        } catch (IllegalArgumentException exception) { return validationError(exception.message, requestId) }
+        catch (Exception exception) { return operationInternalError('requestsAddComment', requestId, exception) }
+    }
+
+    Map requestsGetComments(Map requestContent, def user) {
+        return pagedRequestOperation('requestsGetComments', requestContent) { Map currentUser, Map request, Map visibility, int page, int pageSize, String requestId ->
+            boolean includeInternal = canProcess(currentUser) && requestRepository.canProcess(request, currentUser, visibility)
+            Map result = requestRepository.findCommentsPage(request, currentUser, includeInternal, page, pageSize)
+            return CommonFunctions.successResponse(normalizePage(result, page, pageSize), requestId)
+        }
+    }
+
+    Map requestsGetHistory(Map requestContent, def user) {
+        return pagedRequestOperation('requestsGetHistory', requestContent) { Map currentUser, Map request, Map visibility, int page, int pageSize, String requestId ->
+            boolean includeInternal = canProcess(currentUser) && requestRepository.canProcess(request, currentUser, visibility)
+            Map result = requestRepository.findHistoryPage(request, currentUser, includeInternal, page, pageSize)
+            return CommonFunctions.successResponse(normalizePage(result, page, pageSize), requestId)
+        }
+    }
+
+    Map requestsGetAttachments(Map requestContent, def user) {
+        return readRequestOperation('requestsGetAttachments', requestContent) { Map currentUser, Map visibility, String entityId, String requestId ->
+            Map request = requestRepository.findVisibleById(entityId, currentUser, visibility)
+            if (!request) return requestNotFound(requestId)
+            // Metadata only. File download remains behind TODO(NAUMEN-FILES).
+            List items = requestRepository.findAttachmentMetadata(request, currentUser) ?: []
+            return CommonFunctions.successResponse(items, requestId)
+        }
+    }
+
+    Map requestsGetSla(Map requestContent, def user) {
+        return readRequestOperation('requestsGetSla', requestContent) { Map currentUser, Map visibility, String entityId, String requestId ->
+            Map request = requestRepository.findVisibleById(entityId, currentUser, visibility)
+            if (!request) return requestNotFound(requestId)
+            Map sla = requestRepository.getSlaSnapshot(request, currentUser, new Date())
+            return CommonFunctions.successResponse(sla ?: [:], requestId)
+        }
+    }
 
     Map requestsGetList(Map requestContent, def user) {
         String requestId = CommonFunctions.requestId(requestContent)
@@ -124,6 +215,78 @@ class RequestFunctions {
         }
     }
 
+    private Map readRequestOperation(String operation, Map requestContent, Closure action) {
+        String requestId = CommonFunctions.requestId(requestContent)
+        try {
+            Map currentUser = requireRequestUser(requestContent, requestId)
+            if (currentUser.errorResponse) return currentUser.errorResponse
+            String entityId = requiredId(requestContent?.entityId, 'entityId')
+            Map visibility = buildVisibility(currentUser, currentUser.roles as Set<String>)
+            return action(currentUser, visibility, entityId, requestId)
+        } catch (IllegalArgumentException exception) { return validationError(exception.message, requestId) }
+        catch (Exception exception) { return operationInternalError(operation, requestId, exception) }
+    }
+
+    private Map processRequestOperation(String operation, Map requestContent, Closure action) {
+        String requestId = CommonFunctions.requestId(requestContent)
+        try {
+            Map currentUser = requireRequestUser(requestContent, requestId)
+            if (currentUser.errorResponse) return currentUser.errorResponse
+            if (!canProcess(currentUser)) return forbidden(requestId)
+            String entityId = requiredId(requestContent?.entityId, 'entityId')
+            Map visibility = buildVisibility(currentUser, currentUser.roles as Set<String>)
+            Map request = requestRepository.findVisibleById(entityId, currentUser, visibility)
+            if (!request) return requestNotFound(requestId)
+            if (!requestRepository.canProcess(request, currentUser, visibility)) return forbidden(requestId)
+            return action(currentUser, request, entityId, requestId)
+        } catch (IllegalArgumentException exception) { return validationError(exception.message, requestId) }
+        catch (Exception exception) { return operationInternalError(operation, requestId, exception) }
+    }
+
+    private Map pagedRequestOperation(String operation, Map requestContent, Closure action) {
+        return readRequestOperation(operation, requestContent) { Map currentUser, Map visibility, String entityId, String requestId ->
+            Map request = requestRepository.findVisibleById(entityId, currentUser, visibility)
+            if (!request) return requestNotFound(requestId)
+            int page = positiveInt(requestContent?.page, 1)
+            int pageSize = boundedPageSize(requestContent?.pageSize)
+            return action(currentUser, request, visibility, page, pageSize, requestId)
+        }
+    }
+
+    private Map requireRequestUser(Map requestContent, String requestId) {
+        Map currentUser = requireUser(requestContent, requestId)
+        if (currentUser.errorResponse) return currentUser
+        if (!(currentUser.roles as Set).intersect(['USER', 'OPERATOR', 'SYSTEM_ADMIN'] as Set)) return [errorResponse: forbidden(requestId)]
+        return currentUser
+    }
+
+    private static boolean canProcess(Map user) {
+        Set roles = user.roles as Set
+        return roles.contains('OPERATOR') || roles.contains('SYSTEM_ADMIN')
+    }
+
+    private static Map mutationResponse(Map result, String requestId, String fallback) {
+        if (!(result instanceof Map)) throw new IllegalStateException('RequestRepository returned invalid mutation result')
+        if (result.errorCode) {
+            String requestedCode = result.errorCode.toString()
+            String code = ['VERSION_CONFLICT', 'VALIDATION_ERROR', 'FORBIDDEN', 'NOT_FOUND'].contains(requestedCode) ? requestedCode : 'INTERNAL_ERROR'
+            return CommonFunctions.errorResponse(code, result.safeMessage?.toString() ?: fallback, result.fieldErrors instanceof Map ? result.fieldErrors : [:], [], requestId)
+        }
+        if (!(result.data instanceof Map)) throw new IllegalStateException('RequestRepository returned mutation without data')
+        return CommonFunctions.successResponse(result.data, requestId)
+    }
+
+    private static Map normalizePage(Map result, int page, int pageSize) {
+        if (!(result instanceof Map) || !(result.items instanceof List)) throw new IllegalStateException('RequestRepository returned invalid page')
+        int total = result.total instanceof Number ? Math.max(0, result.total as int) : 0
+        return [items: result.items, page: page, pageSize: pageSize, total: total, totalPages: total ? (int) Math.ceil(total / (double) pageSize) : 0]
+    }
+
+    private Map operationInternalError(String operation, String requestId, Exception exception) {
+        logger?.error("${operation} failed, requestId=${requestId}, errorType=${exception.class.name}")
+        return CommonFunctions.errorResponse('INTERNAL_ERROR', 'Внутренняя ошибка сервера', [:], [], requestId)
+    }
+
     private Map requireUser(Map requestContent, String requestId) {
         String token = requestContent?.sessionToken?.toString()
         Map session = token ? sessionRepository.findActiveByToken(token) : null
@@ -132,7 +295,7 @@ class RequestFunctions {
             sessionRepository.revoke(session.id)
             return [errorResponse: CommonFunctions.errorResponse('SESSION_EXPIRED', 'Сессия истекла', [:], [], requestId)]
         }
-        List<String> roles = permissionAdapter?.getRoles(session.userId)
+        List<String> roles = permissionAdapter?.rolesForUser(session.userId)
         if (!(roles instanceof List)) throw new IllegalStateException('PermissionAdapter returned invalid roles')
         return [id: session.userId, roles: roles.collect { it?.toString() }.findAll { it }]
     }
@@ -223,6 +386,23 @@ class RequestFunctions {
         if (!id) throw new IllegalArgumentException("${field} обязателен")
         return id
     }
+    private static String optionalId(def value) { value == null || !value.toString().trim() ? null : value.toString().trim() }
+    private static long requiredVersion(def value) {
+        if (value == null) throw new IllegalArgumentException('expectedVersion обязателен')
+        try {
+            BigDecimal decimal = new BigDecimal(value.toString())
+            if (decimal.stripTrailingZeros().scale() > 0 || decimal < 0) throw new IllegalArgumentException('expectedVersion должен быть неотрицательным целым числом')
+            return decimal.longValueExact()
+        } catch (ArithmeticException | NumberFormatException ignored) { throw new IllegalArgumentException('expectedVersion должен быть неотрицательным целым числом') }
+    }
+    private static String limitedText(def value, int max, boolean required) {
+        String text = value?.toString()?.trim()
+        if (required && !text) throw new IllegalArgumentException('Текст обязателен')
+        if (text?.length() > max) throw new IllegalArgumentException('Текст слишком длинный')
+        return text ?: null
+    }
+    private static Map forbidden(String requestId) { CommonFunctions.errorResponse('FORBIDDEN', 'Недостаточно прав', [:], [], requestId) }
+    private static Map requestNotFound(String requestId) { CommonFunctions.errorResponse('NOT_FOUND', 'Заявка не найдена или недоступна', [:], [], requestId) }
     private static Map validationError(String message, String requestId) { CommonFunctions.errorResponse('VALIDATION_ERROR', message ?: 'Ошибка проверки данных', [:], [], requestId) }
     private static Map notFound(String requestId) { CommonFunctions.errorResponse('NOT_FOUND', 'Услуга не найдена или недоступна', [:], [], requestId) }
 }
