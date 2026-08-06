@@ -134,5 +134,19 @@ export const ru = Object.freeze({
     remainingReaction: 'Осталось на реакцию', remainingResolution: 'Осталось на решение', minutes: '{count} мин.',
     attachments: 'Вложения', noAttachments: 'Вложений нет.',
     attachmentReadOnly: 'Добавление вложений будет реализовано после подтверждения файлового адаптера Naumen.'
+  },
+  profile: {
+    missingUser: 'Не удалось определить пользователя.', loadError: 'Не удалось загрузить профиль.',
+    login: 'Логин', fullName: 'ФИО', email: 'Электронная почта', phone: 'Телефон',
+    organizations: 'Организации', department: 'Подразделение', groups: 'Рабочие группы', roles: 'Роли',
+    language: 'Язык', timezone: 'Часовой пояс', active: 'Активен', preferences: 'Настройки профиля',
+    adminEdit: 'Редактирование пользователя', createdRequests: 'Мои заявки',
+    assignedRequests: 'Назначено лично мне', groupRequests: 'Назначено моим группам',
+    noRequests: 'Заявок нет.', requestsLoadError: 'Не удалось загрузить заявки.',
+    saveError: 'Не удалось сохранить профиль.', versionConflict: 'Профиль уже изменён другим администратором. Перезагрузите страницу.',
+    roleNames: {
+      USER: 'Пользователь', OPERATOR: 'Оператор', CATALOG_ADMIN: 'Администратор каталога',
+      FORM_ADMIN: 'Администратор форм', SLA_ADMIN: 'Администратор SLA', SYSTEM_ADMIN: 'Системный администратор'
+    }
   }
 });
