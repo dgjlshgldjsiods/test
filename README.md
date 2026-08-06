@@ -2,18 +2,16 @@
 
 Статический многостраничный frontend-прототип ITSM без npm, сборщика и frontend-фреймворков.
 
-## Текущий этап
+## Текущий статус
 
-Реализован только базовый UI-каркас:
+Реализованы 10 HTML-страниц, общий интерфейс, NaumenApiClient, сессия и роли, локализация и темы,
+формы и их версии, каталог, заявки, профиль и SLA. Серверные Groovy-файлы задают проектные
+entry-функции и адаптерные границы.
 
-- 10 отдельных HTML-страниц;
-- общий Bootstrap layout, navbar и sidebar;
-- переиспользуемые состояния loading, empty, error и forbidden;
-- общие modal и toast;
-- пустые ES-module контроллеры страниц;
-- конфигурация с безопасными placeholder-значениями.
-
-Не реализованы REST, NaumenApiClient, авторизация, каталог, формы, заявки, SLA и Groovy-функции.
+Сквозная работа с реальной установкой Naumen не подтверждена: `js/config.js` содержит placeholders,
+а внутренние Authentication/Session/Repository/Directory/Calendar адаптеры требуют привязки.
+Файловая интеграция намеренно работает в fail-closed режиме. Итоги полной проверки приведены в
+`docs/final-audit.md`.
 
 ## Запуск
 
@@ -31,3 +29,4 @@
 - docs/permissions.md
 - docs/security.md
 - docs/running.md
+- docs/final-audit.md
