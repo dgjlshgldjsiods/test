@@ -1,1 +1,8 @@
-/* Стили страницы catalog будут добавлены в соответствующем вертикальном этапе. */
+.catalog-tree { min-height: 24rem; }
+.catalog-node { margin-block: .35rem; }
+.catalog-node__summary { display: flex; align-items: center; justify-content: space-between; gap: .5rem; cursor: pointer; }
+.catalog-node__actions { display: inline-flex; flex-wrap: wrap; gap: .25rem; }
+.catalog-node__children { border-inline-start: 1px solid var(--bs-border-color); margin-inline-start: .75rem; padding-inline-start: 1rem; }
+.catalog-service { padding: .35rem .25rem; }
+.remote-selector select[multiple] { min-height: 8rem; }
+@media (max-width: 575.98px) { .catalog-node__summary { align-items: flex-start; flex-direction: column; } }
