@@ -1,1 +1,4 @@
-/* Стили страницы profile будут добавлены в соответствующем вертикальном этапе. */
+.profile-page { max-width: 96rem; margin-inline: auto; }
+.profile-page dt { color: var(--bs-secondary-color); }
+.profile-request-table .table { min-width: 48rem; }
+.profile-request-table th { white-space: nowrap; }
